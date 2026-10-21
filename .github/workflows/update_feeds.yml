@@ -1,0 +1,40 @@
+name: Mettre à jour les flux HugoDécrypte
+
+on:
+  schedule:
+    # S'exécute automatiquement toutes les 6 heures (vous pouvez ajuster)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Permet de lancer la mise à jour manuellement depuis GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Récupérer le code du dépôt
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: 🚀 Lancer le script Instagram
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+        run: python fetch_instagram.py
+
+      - name: 🚀 Lancer la fusion des flux
+        run: python fetch_all_feeds.py
+
+      - name: 💾 Commit et push des modifications sur GitHub
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add public/ instagram_data.json all_media_data.json
+          git commit -m "🤖 Mise automatique des flux et des images" || echo "Pas de changements à commiter"
+          git push

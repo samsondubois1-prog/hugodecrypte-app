@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HugoDécrypte — Hub d'Actualités</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card-bg: #161920;
+      --border: #262a35;
+      --text-main: #f0f2f5;
+      --text-muted: #8b92a0;
+      --accent-insta: #e1306c;
+      --accent-yt: #ff0000;
+      --accent-pod: #1ed760;
+      --accent-trend: #6366f1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 30px 20px;
+      min-height: 100vh;
+    }
+
+    header { text-align: center; max-width: 800px; margin: 0 auto 30px auto; }
+    header h1 {
+      font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    header p { color: var(--text-muted); font-size: 1rem; }
+
+    /* Barre de recherche */
+    .search-container {
+      max-width: 500px;
+      margin: 20px auto 0 auto;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      padding: 12px 42px 12px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.25s ease;
+    }
+    .search-input:focus { border-color: var(--accent-trend); }
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Section Tendance / À la une du jour */
+    .trending-banner {
+      max-width: 800px;
+      margin: 20px auto 0 auto;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(22, 25, 32, 0.9) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .trending-banner:hover {
+      border-color: rgba(99, 102, 241, 0.8);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2);
+    }
+    .trending-content { display: flex; flex-direction: column; gap: 4px; text-align: left; }
+    .trending-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #a5b4fc; display: flex; align-items: center; gap: 6px; }
+    .trending-title { font-size: 0.95rem; font-weight: 700; color: var(--text-main); line-height: 1.3; }
+    .trending-badge-action { background: var(--accent-trend); color: #fff; font-size: 0.8rem; font-weight: 600; padding: 6px 14px; border-radius: 20px; white-space: nowrap; }
+
+    /* Barre de contrôle */
+    .controls-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+    .tabs-container { display: flex; gap: 10px; flex-wrap: wrap; }
+    
+    .tab-btn {
+      padding: 10px 22px; border: 1px solid var(--border); background: var(--card-bg);
+      color: var(--text-muted); border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+      transition: all 0.25s ease;
+    }
+    .tab-btn:hover { border-color: #3f4657; color: var(--text-main); }
+    .tab-btn.active { background: var(--text-main); color: #000; border-color: var(--text-main); }
+
+    .sub-tab-btn {
+      padding: 6px 16px; border: 1px solid var(--border); background: #1a1d26;
+      color: var(--text-muted); border-radius: 20px; cursor: pointer; font-weight: 500; font-size: 0.82rem;
+      transition: all 0.2s ease;
+    }
+    .sub-tab-btn:hover { border-color: var(--text-main); color: var(--text-main); }
+    .sub-tab-btn.active-pod { background: var(--accent-pod); color: #000; border-color: var(--accent-pod); font-weight: 700; }
+    .sub-tab-btn.active-yt { background: var(--accent-yt); color: #fff; border-color: var(--accent-yt); font-weight: 700; }
+
+    .date-filter-box { display: flex; align-items: center; gap: 8px; background: var(--card-bg); border: 1px solid var(--border); padding: 6px 14px; border-radius: 30px; }
+    .date-filter-box label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    .date-input { background: transparent; border: none; color: var(--text-main); font-size: 0.9rem; font-family: inherit; outline: none; color-scheme: dark; cursor: pointer; }
+    .reset-date-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; padding: 0 4px; }
+    .reset-date-btn:hover { color: var(--accent-yt); }
+
+    .refresh-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .refresh-btn:hover { border-color: #6366f1; background: #1e222d; }
+    .refresh-btn:active { transform: scale(0.96); }
+
+    .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; max-width: 1280px; margin: 0 auto; }
+    
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .card.clickable { cursor: pointer; }
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: #3f4657;
+      box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45);
+    }
+
+    .card-insta {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #161920;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-insta .insta-img-container {
+      width: 100%;
+      background: #0b0d10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .card-insta .insta-img-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      transition: transform 0.4s ease;
+    }
+    .card-insta:hover .insta-img-container img {
+      transform: scale(1.02);
+    }
+    .card-insta .insta-overlay {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(10, 12, 16, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+
+    .badge { font-size: 0.75rem; font-weight: 700; padding: 5px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .badge-instagram { background: rgba(225, 48, 108, 0.25); color: #ff5388; border: 1px solid rgba(225, 48, 108, 0.4); }
+    .badge-youtube { background: rgba(255, 0, 0, 0.15); color: var(--accent-yt); }
+    .badge-podcast { background: rgba(30, 215, 96, 0.15); color: var(--accent-pod); }
+
+    .carousel-tag {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .media-box { 
+      position: relative; 
+      width: 100%; 
+      background: #0b0d10; 
+      overflow: hidden; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+    }
+    .media-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
+    .card-title { font-size: 1.05rem; font-weight: 700; line-height: 1.4; margin-bottom: 10px; color: var(--text-main); }
+    .card-caption { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 14px; margin-top: auto; }
+    .card-date { font-size: 0.82rem; color: #cbd5e1; font-weight: 600; }
+
+    /* MODALE */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    
+    .modal-card {
+      background: #14171f;
+      border: 1px solid #2a2f3e;
+      border-radius: 24px;
+      max-width: 850px;
+      width: 100%;
+      max-height: 92vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 35px 70px rgba(0,0,0,0.7);
+    }
+
+    .modal-close-btn {
+      position: absolute; top: 18px; right: 18px; background: rgba(0, 0, 0, 0.6); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; z-index: 20;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .modal-close-btn:hover { background: rgba(255, 255, 255, 0.25); }
+
+    .modal-media-box { position: relative; width: 100%; height: 600px; background: #000; overflow: hidden; display: flex; }
+    .carousel-track { display: flex; height: 100%; width: 100%; will-change: transform; }
+    .carousel-track img { width: 100%; height: 100%; object-fit: contain; flex-shrink: 0; }
+    
+    .carousel-nav-btn {
+      position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.75); color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2); width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+      z-index: 15; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+    }
+    .carousel-nav-btn:hover { background: rgba(0, 0, 0, 0.95); }
+    .carousel-nav-btn.prev { left: 15px; } 
+    .carousel-nav-btn.next { right: 15px; }
+    .carousel-nav-btn.hidden { display: none !important; }
+
+    .modal-body { padding: 25px 30px; overflow-y: auto; }
+    .modal-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .modal-title { font-size: 1.35rem; font-weight: 800; line-height: 1.3; color: var(--text-main); }
+
+    .modal-footer-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .toggle-desc-btn {
+      background: #1e2430;
+      border: 1px solid #333b4d;
+      color: #cbd5e1;
+      padding: 10px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .toggle-desc-btn:hover {
+      background: #283040;
+      color: #fff;
+      border-color: #4a5568;
+    }
+
+    .podcast-hero-box {
+      background: linear-gradient(135deg, rgba(30, 215, 96, 0.1) 0%, rgba(22, 25, 32, 0.8) 100%);
+      border: 1px solid rgba(30, 215, 96, 0.25);
+      border-radius: 20px;
+      padding: 24px;
+      margin-top: 25px;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .player-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
+    .btn-player { background: #1e222d; border: 1px solid #323849; color: var(--text-main); width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
+    .btn-player:hover { background: #2a3040; }
+    .btn-player-main { background: var(--accent-pod); color: #000; width: 62px; height: 62px; font-size: 1.6rem; font-weight: bold; border: none; }
+    .btn-player-main:hover { background: #22ee6b; }
+
+    .progress-bar-container { display: flex; align-items: center; gap: 14px; width: 100%; }
+    .time-label { font-size: 0.82rem; color: var(--text-muted); font-family: monospace; min-width: 42px; }
+    .progress-bar { flex-grow: 1; height: 6px; background: #282e3d; border-radius: 3px; appearance: none; outline: none; cursor: pointer; }
+    .progress-bar::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-pod); cursor: pointer; }
+
+    .summary-card {
+      background: #181c26;
+      border: 1px solid #282d3d;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 15px;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 15px 10px; }
+      header h1 { font-size: 1.8rem; }
+      .controls-container { flex-direction: column; gap: 12px; }
+      .tabs-container { width: 100%; justify-content: center; }
+      .tab-btn { padding: 8px 14px; font-size: 0.85rem; }
+      .feed-grid { grid-template-columns: 1fr; gap: 20px; }
+      .modal-card { max-height: 95vh; border-radius: 16px; margin: 10px; }
+      .modal-body { padding: 20px; }
+      .modal-media-box { height: 400px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>HugoDécrypte</h1>
+    <p>Le fil d'actualités centralisé en temps réel</p>
+
+    <!-- BARRE DE RECHERCHE -->
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un mot-clé (ex: Trump, Élections, Climat...)" oninput="handleSearch(this.value)">
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <!-- BANNER TENDANCE / À LA UNE BASÉ SUR LES STATS RÉELLES -->
+    <div id="trendingBanner" class="trending-banner" style="display: none;" onclick="openTrendingItem()">
+      <div class="trending-content">
+        <span class="trending-label">🔥 À la une du jour</span>
+        <span class="trending-title" id="trendingTitle">Calcul de la tendance...</span>
+      </div>
+      <span class="trending-badge-action">Découvrir</span>
+    </div>
+
+    <div class="controls-container">
+      <div class="tabs-container">
+        <button class="tab-btn active" onclick="filterFeed('instagram', event)">📸 Instagram</button>
+        <button class="tab-btn" onclick="filterFeed('youtube', event)">▶️ YouTube</button>
+        <button class="tab-btn" onclick="filterFeed('podcast', event)">🎙️ Podcasts</button>
+      </div>
+
+      <div class="date-filter-box">
+        <label for="datePicker">📅 Date :</label>
+        <input type="date" id="datePicker" class="date-input" onchange="applyDateFilter(this.value)">
+        <button class="reset-date-btn" title="Réinitialiser" onclick="resetDateFilter()">✕</button>
+      </div>
+
+      <button class="refresh-btn" onclick="manualRefreshData()" title="Mettre à jour les flux">
+        🔄 Rafraîchir
+      </button>
+    </div>
+
+    <div id="podcastThemesContainer" class="tabs-container" style="display: none; margin-top: 15px; justify-content: center;">
+      <button class="sub-tab-btn active-pod" onclick="filterPodcastTheme('all', event)">🌐 Tous les thèmes</button>
+      <button class="sub-tab-btn" onclick="filterPodcastTheme('Infos', event)">📰 Infos</button>
+      <button class="sub-tab-btn" onclick="filterPodcastTheme('Médias', event)">📺 Médias</button>
+      <button class="sub-tab-btn" onclick="filterPodcastTheme('Culture', event)">🎭 Culture</button>
+    </div>
+
+    <div id="youtubeFormatsContainer" class="tabs-container" style="display: none; margin-top: 15px; justify-content: center;">
+      <button class="sub-tab-btn active-yt" onclick="filterYoutubeFormat('all', event)">🌐 Tous les formats</button>
+      <button class="sub-tab-btn" onclick="filterYoutubeFormat('long', event)">🎬 Vidéos longues</button>
+      <button class="sub-tab-btn" onclick="filterYoutubeFormat('short', event)">📱 Vidéos courtes</button>
+    </div>
+  </header>
+
+  <main id="feed" class="feed-grid"></main>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+
+      <div class="modal-media-box" id="modalMediaBox">
+        <div class="carousel-track" id="modalCarouselTrack"></div>
+        <button class="carousel-nav-btn prev hidden" id="modalPrevBtn" onclick="navigateModalCarousel(-1)">❮</button>
+        <button class="carousel-nav-btn next hidden" id="modalNextBtn" onclick="navigateModalCarousel(1)">❯</button>
+      </div>
+
+      <div class="modal-body" id="modalBodyContainer">
+        <div class="modal-meta">
+          <span class="badge" id="modalBadge">Instagram</span>
+        </div>
+        <div class="modal-title" id="modalTitle"></div>
+
+        <div class="podcast-hero-box" id="podcastPlayerBox" style="display: none;">
+          <audio id="audioElement" style="display: none;"></audio>
+          
+          <div class="player-controls">
+            <button class="btn-player" title="Précédent" onclick="navigatePodcast(-1)">⏮</button>
+            <button class="btn-player" title="-10 sec" onclick="skipAudio(-10)">↺ 10s</button>
+            <button class="btn-player btn-player-main" id="playPauseBtn" onclick="togglePlayPause()">▶</button>
+            <button class="btn-player" title="+10 sec" onclick="skipAudio(10)">10s ↻</button>
+            <button class="btn-player" title="Suivant" onclick="navigatePodcast(1)">⏭</button>
+          </div>
+
+          <div class="progress-bar-container">
+            <span class="time-label" id="currentTimeLabel">0:00</span>
+            <input type="range" class="progress-bar" id="audioProgressBar" value="0" min="0" max="100" oninput="seekAudio(this.value)">
+            <span class="time-label" id="durationLabel">0:00</span>
+          </div>
+        </div>
+
+        <div class="modal-footer-controls">
+          <button id="toggleDescBtn" class="toggle-desc-btn" style="display: none;" onclick="toggleDescription()">
+            Afficher la description
+          </button>
+          <span class="card-date" id="modalDate"></span>
+        </div>
+
+        <div class="summary-card" id="modalCaptionBox" style="display: none;">
+          <div id="modalCaption"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let globalContent = [];
+    let displayedCount = 20;
+    let currentModalItem = null;
+    let currentModalImgIndex = 0;
+    let currentFilter = 'instagram';
+    let currentPodcastTheme = 'all';
+    let currentYoutubeFormat = 'all';
+    let selectedDateIso = '';
+    let searchQuery = '';
+    let trendingItem = null;
+
+    const audioElement = document.getElementById('audioElement');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const audioProgressBar = document.getElementById('audioProgressBar');
+    const currentTimeLabel = document.getElementById('currentTimeLabel');
+    const durationLabel = document.getElementById('durationLabel');
+
+    async function initApp() {
+      await loadData();
+      setupAudioEvents();
+    }
+
+    async function loadData() {
+      try {
+        const timestamp = Date.now();
+        const res = await fetch(`/all_media_data.json?t=${timestamp}`);
+        if (res.ok) {
+          globalContent = await res.json();
+        } else {
+          const resInsta = await fetch(`/instagram_data.json?t=${timestamp}`);
+          if (resInsta.ok) globalContent = await resInsta.json();
+        }
+        updateTrendingItem();
+        renderGrid();
+      } catch (err) {
+        console.error("Erreur au chargement des flux :", err);
+      }
+    }
+
+    // Sélectionne le post ayant le plus de likes parmi les publications les plus récentes
+    function updateTrendingItem() {
+      if (!globalContent || globalContent.length === 0) return;
+
+      // On isole les posts de la date la plus récente disponible dans le flux
+      const latestDateIso = globalContent[0].dateIso;
+      const todayItems = globalContent.filter(i => i.dateIso === latestDateIso);
+
+      // On trie ces posts par nombre de likes décroissant (`likesCount`)
+      todayItems.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
+
+      trendingItem = todayItems.length > 0 ? todayItems[0] : globalContent[0];
+
+      const banner = document.getElementById('trendingBanner');
+      const titleElem = document.getElementById('trendingTitle');
+
+      if (trendingItem && trendingItem.title) {
+        const likesInfo = trendingItem.likesCount ? ` (${trendingItem.likesCount.toLocaleString()} likes)` : '';
+        titleElem.innerText = `${trendingItem.title}${likesInfo}`;
+        banner.style.display = 'flex';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    function openTrendingItem() {
+      if (!trendingItem) return;
+      const itemType = trendingItem.type || 'instagram';
+
+      if (itemType === 'youtube') {
+        window.open(`https://www.youtube.com/watch?v=${trendingItem.id}`, '_blank');
+      } else {
+        openModal(trendingItem);
+      }
+    }
+
+    async function manualRefreshData() {
+      console.log("🔄 Actualisation manuelle des flux demandée...");
+      await loadData();
+    }
+
+    function renderGrid() {
+      const feed = document.getElementById('feed');
+      feed.innerHTML = '';
+
+      let filteredItems = globalContent.filter(i => (i.type || 'instagram') === currentFilter);
+
+      if (searchQuery.trim() !== '') {
+        const queryWords = searchQuery.toLowerCase().trim().split(/\s+/);
+        
+        filteredItems = filteredItems.filter(i => {
+          const title = (i.title || '').toLowerCase();
+          const caption = (i.fullCaption || i.descriptionHtml || '').toLowerCase();
+
+          return queryWords.every(word => title.includes(word) || caption.includes(word));
+        });
+
+        filteredItems.sort((a, b) => {
+          const query = searchQuery.toLowerCase().trim();
+          const aInTitle = (a.title || '').toLowerCase().includes(query) ? 1 : 0;
+          const bInTitle = (b.title || '').toLowerCase().includes(query) ? 1 : 0;
+          return bInTitle - aInTitle;
+        });
+      }
+
+      if (currentFilter === 'podcast' && currentPodcastTheme !== 'all') {
+        filteredItems = filteredItems.filter(i => i.theme === currentPodcastTheme);
+      }
+
+      if (currentFilter === 'youtube' && currentYoutubeFormat !== 'all') {
+        filteredItems = filteredItems.filter(i => (i.format || 'long') === currentYoutubeFormat);
+      }
+
+      if (selectedDateIso && selectedDateIso.trim() !== '') {
+        filteredItems = filteredItems.filter(i => i.dateIso === selectedDateIso);
+      }
+
+      const existingBtn = document.getElementById('loadMoreContainer');
+      if (existingBtn) existingBtn.remove();
+
+      if (filteredItems.length === 0) {
+        feed.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 50px;">Aucune publication ne correspond à votre recherche.</div>`;
+        return;
+      }
+
+      const itemsToDisplay = filteredItems.slice(0, displayedCount);
+
+      itemsToDisplay.forEach((item) => {
+        const itemType = item.type || 'instagram';
+
+        if (itemType === 'instagram') {
+          const card = document.createElement('div');
+          card.className = 'card card-insta clickable';
+          card.onclick = () => openModal(item);
+
+          const mainImg = (item.images && item.images.length > 0) ? item.images[0] : item.imageUrl;
+          const multiIcon = (item.images && item.images.length > 1) ? `<span class="carousel-tag">📸 Images (${item.images.length})</span>` : '';
+
+          card.innerHTML = `
+            <div class="insta-img-container">
+              <img src="${mainImg}" alt="Instagram" loading="lazy">
+            </div>
+            <div class="insta-overlay">
+              <span class="badge badge-instagram">Instagram</span>
+              ${multiIcon}
+              <span class="card-date">${item.date}</span>
+            </div>
+          `;
+          feed.appendChild(card);
+
+        } else if (itemType === 'youtube') {
+          const card = document.createElement('div');
+          card.className = 'card clickable';
+          const thumbUrl = `https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
+          const formatLabel = item.format === 'short' ? '📱 Vidéo courte' : '🎬 Vidéo longue';
+          card.onclick = () => window.open(`https://www.youtube.com/watch?v=${item.id}`, '_blank');
+
+          card.innerHTML = `
+            <div class="media-box video">
+              <img src="${thumbUrl}" alt="${item.title}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${item.id}/mqdefault.jpg'">
+              <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center;">
+                <div style="width: 56px; height: 40px; background: #ff0000; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                  <div style="width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #fff; margin-left: 2px;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="card-title">${item.title}</div>
+              <div class="card-footer">
+                <span class="badge badge-youtube">${formatLabel}</span>
+                <span class="card-date">${item.date}</span>
+              </div>
+            </div>
+          `;
+          feed.appendChild(card);
+
+        } else if (itemType === 'podcast') {
+          const card = document.createElement('div');
+          card.className = 'card clickable';
+          card.onclick = () => openModal(item);
+
+          const themeName = item.theme || 'Infos';
+
+          card.innerHTML = `
+            <div class="card-body" style="padding-top: 25px;">
+              <div class="card-title">🎙️ ${item.title}</div>
+              <div class="card-caption">Cliquer pour écouter l'épisode et voir le sommaire...</div>
+              <div class="card-footer">
+                <span class="badge badge-podcast">Podcast • ${themeName}</span>
+                <span class="card-date">${item.date}</span>
+              </div>
+            </div>
+          `;
+          feed.appendChild(card);
+        }
+      });
+
+      if (displayedCount < filteredItems.length) {
+        const loadMoreContainer = document.createElement('div');
+        loadMoreContainer.id = 'loadMoreContainer';
+        loadMoreContainer.style.gridColumn = '1 / -1';
+        loadMoreContainer.style.textAlign = 'center';
+        loadMoreContainer.style.margin = '30px 0';
+
+        const loadMoreBtn = document.createElement('button');
+        loadMoreBtn.className = 'tab-btn';
+        loadMoreBtn.innerText = 'Charger plus de publications...';
+        loadMoreBtn.onclick = () => {
+          displayedCount += 20;
+          renderGrid();
+        };
+
+        loadMoreContainer.appendChild(loadMoreBtn);
+        feed.parentNode.appendChild(loadMoreContainer);
+      }
+    }
+
+    function handleSearch(val) {
+      searchQuery = val;
+      displayedCount = 20;
+      renderGrid();
+    }
+
+    function openModal(item) {
+      currentModalItem = item;
+      const badge = document.getElementById('modalBadge');
+      const playerBox = document.getElementById('podcastPlayerBox');
+      const mediaBox = document.getElementById('modalMediaBox');
+      const captionBox = document.getElementById('modalCaptionBox');
+      const toggleBtn = document.getElementById('toggleDescBtn');
+      const modalBody = document.getElementById('modalBodyContainer');
+
+      document.getElementById('modalDate').innerText = item.date;
+
+      if (item.type === 'podcast') {
+        const themeName = item.theme || 'Infos';
+        badge.innerText = `Podcast (${themeName})`;
+        badge.className = 'badge badge-podcast';
+        mediaBox.style.display = 'none';
+        playerBox.style.display = 'flex';
+        modalBody.style.display = 'block';
+
+        document.getElementById('modalTitle').innerText = item.title;
+        document.getElementById('modalCaption').innerHTML = item.descriptionHtml || item.title;
+
+        toggleBtn.style.display = 'inline-flex';
+        toggleBtn.innerText = 'Afficher la description';
+        captionBox.style.display = 'none';
+
+        audioElement.src = item.audioUrl;
+        audioElement.load();
+        
+        audioElement.onloadedmetadata = () => {
+          audioElement.currentTime = 60;
+        };
+
+        playPauseBtn.innerText = '▶';
+
+      } else {
+        badge.innerText = 'Instagram';
+        badge.className = 'badge badge-instagram';
+        playerBox.style.display = 'none';
+        modalBody.style.display = 'block';
+        document.getElementById('modalTitle').innerText = ""; 
+        mediaBox.style.display = 'flex';
+        audioElement.pause();
+
+        const fullCaption = item.fullCaption || item.caption || item.title || "";
+        if (fullCaption.trim() !== "") {
+          toggleBtn.style.display = 'inline-flex';
+          toggleBtn.innerText = 'Afficher la description';
+          captionBox.style.display = 'none';
+          document.getElementById('modalCaption').innerText = fullCaption;
+        } else {
+          toggleBtn.style.display = 'none';
+          captionBox.style.display = 'none';
+        }
+
+        currentModalImgIndex = 0;
+        const images = (item.images && item.images.length > 0) ? item.images : [item.imageUrl];
+
+        const track = document.getElementById('modalCarouselTrack');
+        track.style.transition = 'none';
+        track.style.transform = 'translateX(0%)';
+        track.innerHTML = images.map(src => `<img src="${src}" alt="Visuel Instagram">`).join('');
+
+        const prevBtn = document.getElementById('modalPrevBtn');
+        const nextBtn = document.getElementById('modalNextBtn');
+
+        if (images.length > 1) {
+          prevBtn.classList.add('hidden');
+          nextBtn.classList.remove('hidden');
+        } else {
+          prevBtn.classList.add('hidden');
+          nextBtn.classList.add('hidden');
+        }
+      }
+
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function toggleDescription() {
+      const captionBox = document.getElementById('modalCaptionBox');
+      const toggleBtn = document.getElementById('toggleDescBtn');
+
+      if (captionBox.style.display === 'none' || captionBox.style.display === '') {
+        captionBox.style.display = 'block';
+        toggleBtn.innerText = 'Masquer la description';
+      } else {
+        captionBox.style.display = 'none';
+        toggleBtn.innerText = 'Afficher la description';
+      }
+    }
+
+    function navigateModalCarousel(dir) {
+      if (!currentModalItem) return;
+      const images = (currentModalItem.images && currentModalItem.images.length > 0) ? currentModalItem.images : [currentModalItem.imageUrl];
+      const track = document.getElementById('modalCarouselTrack');
+      const prevBtn = document.getElementById('modalPrevBtn');
+      const nextBtn = document.getElementById('modalNextBtn');
+
+      const total = images.length;
+
+      if (dir === 1 && currentModalImgIndex === total - 1) {
+        currentModalImgIndex = 0;
+        track.style.transition = 'transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1)';
+        track.style.transform = `translateX(0%)`;
+
+        prevBtn.classList.add('hidden');
+        if (total > 1) nextBtn.classList.remove('hidden');
+        return;
+      }
+
+      if (dir === -1 && currentModalImgIndex === 0) return;
+
+      currentModalImgIndex += dir;
+      if (currentModalImgIndex < 0) currentModalImgIndex = 0;
+      if (currentModalImgIndex >= total) currentModalImgIndex = total - 1;
+
+      track.style.transition = 'transform 0.3s ease-out';
+      track.style.transform = `translateX(-${currentModalImgIndex * 100}%)`;
+
+      if (currentModalImgIndex > 0) {
+        prevBtn.classList.remove('hidden');
+      } else {
+        prevBtn.classList.add('hidden');
+      }
+
+      if (total > 1) {
+        nextBtn.classList.remove('hidden');
+      }
+    }
+
+    function setupAudioEvents() {
+      audioElement.addEventListener('timeupdate', () => {
+        if (audioElement.duration) {
+          const pct = (audioElement.currentTime / audioElement.duration) * 100;
+          audioProgressBar.value = pct;
+          currentTimeLabel.innerText = formatTime(audioElement.currentTime);
+          durationLabel.innerText = formatTime(audioElement.duration);
+        }
+      });
+
+      audioElement.addEventListener('ended', () => {
+        playPauseBtn.innerText = '▶';
+      });
+    }
+
+    function togglePlayPause() {
+      if (audioElement.paused) {
+        audioElement.play();
+        playPauseBtn.innerText = '⏸';
+      } else {
+        audioElement.pause();
+        playPauseBtn.innerText = '▶';
+      }
+    }
+
+    function skipAudio(seconds) {
+      audioElement.currentTime = Math.min(Math.max(audioElement.currentTime + seconds, 0), audioElement.duration || 0);
+    }
+
+    function seekAudio(percent) {
+      if (audioElement.duration) {
+        audioElement.currentTime = (percent / 100) * audioElement.duration;
+      }
+    }
+
+    function formatTime(secs) {
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function navigatePodcast(direction) {
+      const podcasts = globalContent.filter(i => i.type === 'podcast');
+      const idx = podcasts.findIndex(p => p.id === currentModalItem.id);
+      if (idx !== -1) {
+        const newIdx = idx + direction;
+        if (newIdx >= 0 && newIdx < podcasts.length) {
+          openModal(podcasts[newIdx]);
+        }
+      }
+    }
+
+    function filterFeed(type, event) {
+      currentFilter = type;
+      displayedCount = 20;
+      document.querySelectorAll('.tabs-container .tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (event && event.target) event.target.classList.add('active');
+
+      const podContainer = document.getElementById('podcastThemesContainer');
+      const ytContainer = document.getElementById('youtubeFormatsContainer');
+
+      if (podContainer) podContainer.style.display = (type === 'podcast') ? 'flex' : 'none';
+      if (ytContainer) ytContainer.style.display = (type === 'youtube') ? 'flex' : 'none';
+
+      renderGrid();
+    }
+
+    function filterPodcastTheme(theme, event) {
+      currentPodcastTheme = theme;
+      displayedCount = 20;
+      document.querySelectorAll('#podcastThemesContainer .sub-tab-btn').forEach(btn => btn.classList.remove('active-pod'));
+      if (event && event.target) event.target.classList.add('active-pod');
+
+      renderGrid();
+    }
+
+    function filterYoutubeFormat(format, event) {
+      currentYoutubeFormat = format;
+      displayedCount = 20;
+      document.querySelectorAll('#youtubeFormatsContainer .sub-tab-btn').forEach(btn => btn.classList.remove('active-yt'));
+      if (event && event.target) event.target.classList.add('active-yt');
+
+      renderGrid();
+    }
+
+    function applyDateFilter(dateIso) {
+      selectedDateIso = dateIso;
+      displayedCount = 20;
+      renderGrid();
+    }
+
+    function resetDateFilter() {
+      selectedDateIso = '';
+      displayedCount = 20;
+      document.getElementById('datePicker').value = '';
+      renderGrid();
+    }
+
+    function closeModal() {
+      audioElement.pause();
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    function closeModalOnOverlay(e) {
+      if (e.target.id === 'modalOverlay') closeModal();
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
