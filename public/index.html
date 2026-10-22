@@ -294,85 +294,104 @@
       <button class="sub-tab-btn" onclick="filterYoutubeFormat('short', event)">📱 Vidéos courtes</button>
     </div>
   </header>
+  <main>
+    <div id="feedGrid" class="feed-grid"></div>
+  </main>
 
-  <main id="feed" class="feed-grid"></main>
-
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <!-- MODALE -->
+  <div id="mediaModal" class="modal-overlay" onclick="closeModalOnBg(event)">
     <div class="modal-card">
       <button class="modal-close-btn" onclick="closeModal()">✕</button>
+      
+      <div id="modalMediaContainer"></div>
 
-      <div class="modal-media-box" id="modalMediaBox">
-        <div class="carousel-track" id="modalCarouselTrack"></div>
-        <button class="carousel-nav-btn prev hidden" id="modalPrevBtn" onclick="navigateModalCarousel(-1)">❮</button>
-        <button class="carousel-nav-btn next hidden" id="modalNextBtn" onclick="navigateModalCarousel(1)">❯</button>
-      </div>
-
-      <div class="modal-body" id="modalBodyContainer">
+      <div class="modal-body">
         <div class="modal-meta">
-          <span class="badge" id="modalBadge">Instagram</span>
+          <span id="modalBadge" class="badge"></span>
+          <span id="modalDate" class="card-date"></span>
         </div>
-        <div class="modal-title" id="modalTitle"></div>
+        <h2 id="modalTitle" class="modal-title"></h2>
 
-        <div class="podcast-hero-box" id="podcastPlayerBox" style="display: none;">
-          <audio id="audioElement" style="display: none;"></audio>
-          
-          <div class="player-controls">
-            <button class="btn-player" title="Précédent" onclick="navigatePodcast(-1)">⏮</button>
-            <button class="btn-player" title="-10 sec" onclick="skipAudio(-10)">↺ 10s</button>
-            <button class="btn-player btn-player-main" id="playPauseBtn" onclick="togglePlayPause()">▶</button>
-            <button class="btn-player" title="+10 sec" onclick="skipAudio(10)">10s ↻</button>
-            <button class="btn-player" title="Suivant" onclick="navigatePodcast(1)">⏭</button>
-          </div>
-
-          <div class="progress-bar-container">
-            <span class="time-label" id="currentTimeLabel">0:00</span>
-            <input type="range" class="progress-bar" id="audioProgressBar" value="0" min="0" max="100" oninput="seekAudio(this.value)">
-            <span class="time-label" id="durationLabel">0:00</span>
-          </div>
-        </div>
+        <div id="modalDescriptionSection"></div>
 
         <div class="modal-footer-controls">
-          <button id="toggleDescBtn" class="toggle-desc-btn" style="display: none;" onclick="toggleDescription()">
-            Afficher la description
+          <button id="toggleDescBtn" class="toggle-desc-btn" onclick="toggleFullDescription()" style="display: none;">
+            📜 Lire la description complète
           </button>
-          <span class="card-date" id="modalDate"></span>
-        </div>
-
-        <div class="summary-card" id="modalCaptionBox" style="display: none;">
-          <div id="modalCaption"></div>
+          <a id="modalExternalLink" href="#" target="_blank" class="toggle-desc-btn" style="text-decoration: none; display: none;">
+            🔗 Ouvrir sur la plateforme originale
+          </a>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    let globalContent = [];
-    let displayedCount = 20;
-    let currentModalItem = null;
-    let currentModalImgIndex = 0;
-    let currentFilter = 'instagram';
+    let allMedia = [];
+    let currentTab = 'instagram';
     let currentPodcastTheme = 'all';
     let currentYoutubeChannel = 'actus';
     let currentYoutubeFormat = 'all';
-    let selectedDateIso = '';
-    let searchQuery = '';
-    let trendingItem = null;
+    let currentSearchQuery = '';
+    let selectedDateFilter = '';
+    let trendingItemData = null;
 
-    const audioElement = document.getElementById('audioElement');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const audioProgressBar = document.getElementById('audioProgressBar');
-    const currentTimeLabel = document.getElementById('currentTimeLabel');
-    const durationLabel = document.getElementById('durationLabel');
+    let currentModalItem = null;
+    let currentImgIndex = 0;
+    let isFullDescVisible = false;
 
-    async function initApp() {
-      const savedMode = localStorage.getItem('hugo_interface_mode') || 'desktop';
-      switchInterface(savedMode, false);
+    // Variables du lecteur audio natif Podcast
+    let audioPlayer = null;
+    let isPlaying = false;
+    let audioTimer = null;
 
-      await loadData();
-      setupAudioEvents();
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+    });
+
+    async function loadData() {
+      try {
+        const response = await fetch('all_media_data.json?' + new Date().getTime());
+        if (!response.ok) throw new Error("Fichier de données introuvable.");
+        allMedia = await response.json();
+        
+        computeTrendingOfTheDay();
+        renderFeed();
+      } catch (err) {
+        console.error("Erreur de chargement :", err);
+        document.getElementById('feedGrid').innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 40px;">Impossible de charger les actualités. Vérifiez que les scripts de synchronisation ont bien tourné.</div>`;
+      }
     }
 
-    function switchInterface(mode, save = true) {
+    // FONCTION DE RAFRAÎCHISSEMENT MANUEL LIMITÉE À 2 FOIS PAR JOUR
+    async function manualRefreshData() {
+      const today = new Date().toISOString().split('T')[0]; // Date du jour au format YYYY-MM-DD
+      let lastRefreshDate = localStorage.getItem('hugo_refresh_date') || '';
+      let refreshCount = parseInt(localStorage.getItem('hugo_refresh_count') || '0', 10);
+
+      // Si on a changé de jour, on réinitialise le compteur à 0
+      if (lastRefreshDate !== today) {
+        lastRefreshDate = today;
+        refreshCount = 0;
+      }
+
+      // Vérification de la limite
+      if (refreshCount >= 2) {
+        alert("⚠️ Vous avez atteint la limite de 2 actualisations manuelles autorisées pour aujourd'hui.");
+        return;
+      }
+
+      // Incrémentation et sauvegarde dans le navigateur
+      refreshCount++;
+      localStorage.setItem('hugo_refresh_date', lastRefreshDate);
+      localStorage.setItem('hugo_refresh_count', refreshCount);
+
+      // Exécution du rafraîchissement
+      await loadData();
+      console.log(`Actualisation manuelle effectuée (${refreshCount}/2 aujourd'hui).`);
+    }
+
+    function switchInterface(mode) {
       const body = document.body;
       const btnDesktop = document.getElementById('btnDesktopView');
       const btnMobile = document.getElementById('btnMobileView');
@@ -386,397 +405,349 @@
         btnDesktop.classList.add('active');
         btnMobile.classList.remove('active');
       }
-
-      if (save) {
-        localStorage.setItem('hugo_interface_mode', mode);
-      }
     }
 
-    async function loadData() {
-      try {
-        const timestamp = Date.now();
-        const res = await fetch(`/all_media_data.json?t=${timestamp}`);
-        if (res.ok) {
-          globalContent = await res.json();
-        } else {
-          const resInsta = await fetch(`/instagram_data.json?t=${timestamp}`);
-          if (resInsta.ok) globalContent = await resInsta.json();
-        }
-        updateTrendingItem();
-        renderGrid();
-      } catch (err) {
-        console.error("Erreur au chargement des flux :", err);
-      }
-    }
-
-    function updateTrendingItem() {
-      if (!globalContent || globalContent.length === 0) return;
-      const itemsWithLikes = [...globalContent].filter(i => (i.likesCount || 0) > 0);
-      itemsWithLikes.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
-      trendingItem = itemsWithLikes.length > 0 ? itemsWithLikes[0] : globalContent[0];
-
-      const banner = document.getElementById('trendingBanner');
-      const titleElem = document.getElementById('trendingTitle');
-
-      if (trendingItem) {
-        const itemTitle = trendingItem.title || trendingItem.caption || "Actualité du jour";
-        const likesInfo = trendingItem.likesCount ? ` (${trendingItem.likesCount.toLocaleString()} likes)` : '';
-        titleElem.innerText = `${itemTitle}${likesInfo}`;
-        banner.style.display = 'flex';
-      } else {
-        banner.style.display = 'none';
+    function computeTrendingOfTheDay() {
+      if (!allMedia || allMedia.length === 0) return;
+      // On prend l'élément le plus récent comme tendance du jour
+      trendingItemData = allMedia[0];
+      if (trendingItemData) {
+        document.getElementById('trendingTitle').innerText = trendingItemData.title || "Actualité majeure du jour";
+        document.getElementById('trendingBanner').style.display = 'flex';
       }
     }
 
     function openTrendingItem() {
-      if (!trendingItem) return;
-      const itemType = trendingItem.type || 'instagram';
-      if (itemType === 'youtube') {
-        window.open(`https://www.youtube.com/watch?v=${trendingItem.id}`, '_blank');
-      } else {
-        openModal(trendingItem);
+      if (trendingItemData) {
+        openModal(trendingItemData);
       }
     }
 
-    async function manualRefreshData() {
-      await loadData();
-    }
-
-    function formatTimestampToFrench(ts) {
-      if (!ts || ts === 0 || ts === "0") return 'Récents';
-      
-      let numTs;
-      if (typeof ts === 'number') {
-        numTs = ts < 10000000000 ? ts * 1000 : ts;
-      } else {
-        const parsed = parseFloat(ts);
-        if (isNaN(parsed) || parsed === 0) return 'Récents';
-        numTs = parsed < 10000000000 ? parsed * 1000 : parsed;
-      }
-
-      const d = new Date(numTs);
-      if (isNaN(d.getTime()) || d.getFullYear() < 2020) return 'Récents';
-
-      const months = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
-      const day = d.getDate();
-      const month = months[d.getMonth()];
-      const year = d.getFullYear();
-      
-      // Retourne uniquement le jour, le mois et l'année (ex: 20 octobre 2026)
-      return `${day} ${month} ${year}`;
-    }
-
-    function renderGrid() {
-      const feed = document.getElementById('feed');
-      feed.innerHTML = '';
-
-      let filteredItems = globalContent.filter(i => (i.type || 'instagram') === currentFilter);
-
-      if (currentFilter === 'youtube') {
-        filteredItems = filteredItems.filter(i => (i.channel || 'actus') === currentYoutubeChannel);
-        if (currentYoutubeFormat !== 'all') {
-          filteredItems = filteredItems.filter(i => (i.format || 'long') === currentYoutubeFormat);
-        }
-      }
-
-      if (currentFilter === 'podcast' && currentPodcastTheme !== 'all') {
-        filteredItems = filteredItems.filter(i => i.theme === currentPodcastTheme);
-      }
-
-      if (searchQuery.trim() !== '') {
-        const queryWords = searchQuery.toLowerCase().trim().split(/\s+/);
-        filteredItems = filteredItems.filter(i => {
-          const textToSearch = (i.type === 'instagram') 
-            ? (i.fullCaption || i.caption || i.title || '').toLowerCase()
-            : (i.title || '').toLowerCase();
-            
-          return queryWords.every(word => textToSearch.includes(word));
-        });
-      }
-
-      if (selectedDateIso && selectedDateIso.trim() !== '') {
-        filteredItems = filteredItems.filter(i => i.dateIso === selectedDateIso);
-      }
-
-      const existingBtn = document.getElementById('loadMoreContainer');
-      if (existingBtn) existingBtn.remove();
-
-      if (filteredItems.length === 0) {
-        feed.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 50px;">Aucune publication ne correspond à votre recherche.</div>`;
-        return;
-      }
-
-      const itemsToDisplay = filteredItems.slice(0, displayedCount);
-
-      itemsToDisplay.forEach((item) => {
-        const itemType = item.type || 'instagram';
-        const itemDate = (item.date && item.date !== "Récents" && !item.date.includes("1970")) ? item.date : formatTimestampToFrench(item.timestamp);
-
-        if (itemType === 'instagram') {
-          const card = document.createElement('div');
-          card.className = 'card card-insta clickable';
-          card.onclick = () => openModal(item);
-
-          const mainImg = (item.images && item.images.length > 0) ? item.images[0] : (item.display_url || item.imageUrl);
-          const multiIcon = (item.images && item.images.length > 1) ? `<span class="carousel-tag">Images (${item.images.length})</span>` : '';
-
-          card.innerHTML = `
-            <div class="insta-img-container">
-              <img src="${mainImg}" alt="Instagram" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500'">
-            </div>
-            <div class="insta-overlay">
-              <span class="badge badge-instagram">Instagram</span>
-              ${multiIcon}
-              <span class="card-date">${itemDate}</span>
-            </div>
-          `;
-          feed.appendChild(card);
-
-        } else if (itemType === 'youtube') {
-          const card = document.createElement('div');
-          card.className = 'card clickable';
-          const thumbUrl = `https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
-          const formatLabel = item.format === 'short' ? '📱 Vidéo courte' : '🎬 Vidéo longue';
-          card.onclick = () => window.open(`https://www.youtube.com/watch?v=${item.id}`, '_blank');
-
-          card.innerHTML = `
-            <div class="media-box video">
-              <img src="${thumbUrl}" alt="${item.title}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${item.id}/mqdefault.jpg'">
-              <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center;">
-                <div style="width: 56px; height: 40px; background: #ff0000; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-                  <div style="width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #fff; margin-left: 2px;"></div>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">${item.title}</div>
-              <div class="card-footer">
-                <span class="badge badge-youtube">${formatLabel}</span>
-                <span class="card-date">${itemDate}</span>
-              </div>
-            </div>
-          `;
-          feed.appendChild(card);
-
-        } else if (itemType === 'podcast') {
-          const card = document.createElement('div');
-          card.className = 'card clickable';
-          card.onclick = () => openModal(item);
-          const themeName = item.theme || 'Infos';
-
-          card.innerHTML = `
-            <div class="card-body" style="padding-top: 25px;">
-              <div class="card-title">🎙️ ${item.title}</div>
-              <div class="card-caption">Cliquer pour écouter l'épisode et voir le sommaire...</div>
-              <div class="card-footer">
-                <span class="badge badge-podcast">Podcast • ${themeName}</span>
-                <span class="card-date">${itemDate}</span>
-              </div>
-            </div>
-          `;
-          feed.appendChild(card);
-        }
-      });
-    }
-
-    function handleSearch(val) {
-      searchQuery = val;
-      displayedCount = 20;
-      renderGrid();
-    }
-
-    function filterFeed(type, event) {
-      currentFilter = type;
-      displayedCount = 20;
+    function filterFeed(tab, event) {
+      currentTab = tab;
       document.querySelectorAll('.tabs-container .tab-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      if (event && event.target) event.target.classList.add('active');
 
-      document.getElementById('podcastThemesContainer').style.display = (type === 'podcast') ? 'flex' : 'none';
-      document.getElementById('youtubeChannelsContainer').style.display = (type === 'youtube') ? 'flex' : 'none';
-      document.getElementById('youtubeFormatsContainer').style.display = (type === 'youtube') ? 'flex' : 'none';
-      renderGrid();
+      document.getElementById('podcastThemesContainer').style.display = (tab === 'podcast') ? 'flex' : 'none';
+      document.getElementById('youtubeChannelsContainer').style.display = (tab === 'youtube') ? 'flex' : 'none';
+      document.getElementById('youtubeFormatsContainer').style.display = (tab === 'youtube') ? 'flex' : 'none';
+
+      renderFeed();
     }
 
     function filterPodcastTheme(theme, event) {
       currentPodcastTheme = theme;
       document.querySelectorAll('#podcastThemesContainer .sub-tab-btn').forEach(b => b.classList.remove('active-pod'));
-      event.target.classList.add('active-pod');
-      renderGrid();
+      if (event && event.target) event.target.classList.add('active-pod');
+      renderFeed();
     }
 
-    function filterYoutubeChannel(channel, event) {
-      currentYoutubeChannel = channel;
+    function filterYoutubeChannel(channelKey, event) {
+      currentYoutubeChannel = channelKey;
       document.querySelectorAll('#youtubeChannelsContainer .sub-tab-btn').forEach(b => b.classList.remove('active-yt'));
-      event.target.classList.add('active-yt');
-      renderGrid();
+      if (event && event.target) event.target.classList.add('active-yt');
+      renderFeed();
     }
 
     function filterYoutubeFormat(format, event) {
       currentYoutubeFormat = format;
       document.querySelectorAll('#youtubeFormatsContainer .sub-tab-btn').forEach(b => b.classList.remove('active-yt'));
-      event.target.classList.add('active-yt');
-      renderGrid();
+      if (event && event.target) event.target.classList.add('active-yt');
+      renderFeed();
     }
 
-    function applyDateFilter(dateVal) {
-      selectedDateIso = dateVal;
-      renderGrid();
+    function handleSearch(query) {
+      currentSearchQuery = query.toLowerCase().trim();
+      renderFeed();
+    }
+
+    function applyDateFilter(dateStr) {
+      selectedDateFilter = dateStr; // Format YYYY-MM-DD fourni par l'input date
+      renderFeed();
     }
 
     function resetDateFilter() {
-      selectedDateIso = '';
       document.getElementById('datePicker').value = '';
-      renderGrid();
+      selectedDateFilter = '';
+      renderFeed();
     }
 
+    function renderFeed() {
+      const grid = document.getElementById('feedGrid');
+      grid.innerHTML = '';
+
+      let filtered = allMedia.filter(item => {
+        // Filtrage par onglet principal
+        if (item.type !== currentTab) return false;
+
+        // Sous-filtres spécifiques
+        if (currentTab === 'podcast' && currentPodcastTheme !== 'all' && item.theme !== currentPodcastTheme) return false;
+        if (currentTab === 'youtube') {
+          if (currentYoutubeChannel !== 'all' && item.channel !== currentYoutubeChannel) return false;
+          if (currentYoutubeFormat !== 'all' && item.format !== currentYoutubeFormat) return false;
+        }
+
+        // Filtre par date exacte
+        if (selectedDateFilter && item.dateIso !== selectedDateFilter) return false;
+
+        // Filtrage multicritère intelligent de la barre de recherche
+        if (currentSearchQuery) {
+          const title = (item.title || "").toLowerCase();
+          const caption = (item.fullCaption || "").toLowerCase();
+          
+          if (currentTab === 'instagram') {
+            // Instagram : recherche stricte sur la légende uniquement
+            if (!caption.includes(currentSearchQuery)) return false;
+          } else if (currentTab === 'youtube') {
+            // YouTube : recherche stricte sur le titre uniquement
+            if (!title.includes(currentSearchQuery)) return false;
+          } else {
+            // Podcasts / Autres : recherche globale titre + description
+            if (!title.includes(currentSearchQuery) && !caption.includes(currentSearchQuery)) return false;
+          }
+        }
+
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 50px; font-size: 1rem;">Aucun contenu trouvé pour cette sélection.</div>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = item.type === 'instagram' ? 'card card-insta clickable' : 'card clickable';
+        card.onclick = () => openModal(item);
+
+        if (item.type === 'instagram') {
+          let imageUrl = item.imageUrl || (item.images && item.images[0]) || '';
+          let countInfo = item.images && item.images.length > 1 ? `<span class="carousel-tag">📷 ${item.images.length} images</span>` : `<span class="badge badge-instagram">Instagram</span>`;
+          
+          card.innerHTML = `
+            <div class="insta-img-container">
+              <img src="${imageUrl}" alt="Post Instagram" loading="lazy">
+            </div>
+            <div class="insta-overlay">
+              ${countInfo}
+              <span class="card-date">${item.date || 'Récents'}</span>
+            </div>
+          `;
+        } else if (item.type === 'youtube') {
+          let badgeText = item.format === 'short' ? 'Short YouTube' : (item.channel === 'grands_formats' ? 'Grands Formats' : 'Actus du jour');
+          card.innerHTML = `
+            <div class="media-box">
+              <img src="https://i.ytimg.com/vi/${item.id}/hqdefault.jpg" alt="${item.title}" loading="lazy">
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">${item.title}</h3>
+              <div class="card-footer">
+                <span class="badge badge-youtube">${badgeText}</span>
+                <span class="card-date">${item.date || 'Récents'}</span>
+              </div>
+            </div>
+          `;
+        } else if (item.type === 'podcast') {
+          card.innerHTML = `
+            <div class="card-body" style="justify-content: space-between; min-height: 200px;">
+              <div>
+                <span class="badge badge-podcast" style="margin-bottom: 12px; display: inline-block;">🎙️ Podcast • ${item.theme || 'Infos'}</span>
+                <h3 class="card-title" style="font-size: 1.15rem; margin-bottom: 8px;">${item.title}</h3>
+              </div>
+              <div class="card-footer">
+                <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #a5b4fc;">Écouter l'épisode</span>
+                <span class="card-date">${item.date || 'Récents'}</span>
+              </div>
+            </div>
+          `;
+        }
+        grid.appendChild(card);
+      });
+    }
+
+    // GESTION DE LA MODALE & LECTEUR AUDIO
     function openModal(item) {
       currentModalItem = item;
-      const badge = document.getElementById('modalBadge');
-      const playerBox = document.getElementById('podcastPlayerBox');
-      const mediaBox = document.getElementById('modalMediaBox');
-      const captionBox = document.getElementById('modalCaptionBox');
+      currentImgIndex = 0;
+      isFullDescVisible = false;
+
+      const modalContainer = document.getElementById('modalMediaContainer');
+      const modalBadge = document.getElementById('modalBadge');
+      const modalDate = document.getElementById('modalDate');
+      const modalTitle = document.getElementById('modalTitle');
+      const descSection = document.getElementById('modalDescriptionSection');
       const toggleBtn = document.getElementById('toggleDescBtn');
+      const extLink = document.getElementById('modalExternalLink');
 
-      document.getElementById('modalDate').innerText = (item.date && item.date !== "Récents" && !item.date.includes("1970")) ? item.date : formatTimestampToFrench(item.timestamp);
+      modalContainer.innerHTML = '';
+      stopAudio();
 
-      if (item.type === 'podcast') {
-        badge.innerText = `Podcast (${item.theme || 'Infos'})`;
-        badge.className = 'badge badge-podcast';
-        mediaBox.style.display = 'none';
-        playerBox.style.display = 'flex';
-        document.getElementById('modalTitle').innerText = item.title;
-        document.getElementById('modalCaption').innerHTML = item.descriptionHtml || item.title;
-        toggleBtn.style.display = 'inline-flex';
-        toggleBtn.innerText = 'Afficher la description';
-        captionBox.style.display = 'none';
+      modalTitle.innerText = item.title || '';
+      modalDate.innerText = item.date || '';
 
-        audioElement.src = item.audioUrl;
-        audioElement.load();
-        playPauseBtn.innerText = '▶';
-      } else {
-        badge.innerText = 'Instagram';
-        badge.className = 'badge badge-instagram';
-        playerBox.style.display = 'none';
-        mediaBox.style.display = 'flex';
-        document.getElementById('modalTitle').innerText = "";
-        audioElement.pause();
+      if (item.type === 'instagram') {
+        modalBadge.className = 'badge badge-instagram';
+        modalBadge.innerText = 'Instagram';
+        extLink.style.display = 'none';
 
-        const fullCaption = item.fullCaption || item.caption || item.title || "";
-        if (fullCaption.trim() !== "") {
-          toggleBtn.style.display = 'inline-flex';
-          toggleBtn.innerText = 'Afficher la description';
-          captionBox.style.display = 'none';
-          document.getElementById('modalCaption').innerText = fullCaption;
-        } else {
-          toggleBtn.style.display = 'none';
-          captionBox.style.display = 'none';
-        }
-
-        currentModalImgIndex = 0;
-        const images = (item.images && item.images.length > 0) ? item.images : [item.display_url || item.imageUrl];
-        const track = document.getElementById('modalCarouselTrack');
-        track.style.transition = 'none';
-        track.style.transform = 'translateX(0%)';
-        track.innerHTML = images.map(src => `<img src="${src}" alt="Visuel" onerror="this.src='https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500'">`).join('');
-
-        const prevBtn = document.getElementById('modalPrevBtn');
-        const nextBtn = document.getElementById('modalNextBtn');
+        let images = item.images && item.images.length > 0 ? item.images : [item.imageUrl];
         if (images.length > 1) {
-          prevBtn.classList.add('hidden');
-          nextBtn.classList.remove('hidden');
+          let trackHtml = `<div id="carouselTrack" class="carousel-track">` + images.map(img => `<img src="${img}" alt="Slide">`).join('') + `</div>`;
+          trackHtml += `<button id="prevBtn" class="carousel-nav-btn prev hidden" onclick="moveCarousel(-1)">❮</button>`;
+          trackHtml += `<button id="nextBtn" class="carousel-nav-btn next" onclick="moveCarousel(1)">❯</button>`;
+          modalContainer.innerHTML = `<div class="modal-media-box">${trackHtml}</div>`;
         } else {
-          prevBtn.classList.add('hidden');
-          nextBtn.classList.add('hidden');
+          modalContainer.innerHTML = `<div class="modal-media-box"><img src="${images[0]}" style="width:150%; height:100%; object-fit:contain; display:block; margin:auto;" alt="Post"></div>`;
         }
+
+        descSection.innerHTML = `<div class="card-caption" style="font-size: 0.98rem; line-height: 1.6; color: #e2e8f0; white-space: pre-line;">${item.fullCaption || ''}</div>`;
+        toggleBtn.style.display = 'none';
+
+      } else if (item.type === 'youtube') {
+        modalBadge.className = 'badge badge-youtube';
+        modalBadge.innerText = item.format === 'short' ? 'Short YouTube' : 'YouTube';
+        extLink.style.display = 'inline-flex';
+        extLink.href = `https://www.youtube.com/watch?v=${item.id}`;
+
+        modalContainer.innerHTML = `<div class="modal-media-box"><iframe src="${item.embedUrl}?autoplay=1" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+        
+        descSection.innerHTML = `<div class="card-caption" style="font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; max-height: 120px; overflow: hidden; text-overflow: ellipsis;">${item.fullCaption || ''}</div>`;
+        toggleBtn.style.display = item.fullCaption && item.fullCaption.length > 150 ? 'inline-flex' : 'none';
+        toggleBtn.innerText = '📜 Lire la description complète';
+
+      } else if (item.type === 'podcast') {
+        modalBadge.className = 'badge badge-podcast';
+        modalBadge.innerText = `Podcast • ${item.theme || 'Infos'}`;
+        extLink.style.display = 'none';
+
+        modalContainer.innerHTML = `
+          <div class="podcast-hero-box" style="margin: 0; width: 100%; height: 100%; justify-content: center; border-radius: 0;">
+            <div style="text-align: center; margin-bottom: 5px;">
+              <span style="font-size: 0.85rem; color: #1ed760; font-weight: 700; text-transform: uppercase;">🎧 Épisode officiel HugoDécrypte</span>
+            </div>
+            <div class="player-controls">
+              <button class="btn-player" onclick="skipAudio(-15)" title="Reculer de 15s">⏪</button>
+              <button id="mainPlayBtn" class="btn-player btn-player-main" onclick="togglePlayAudio()">▶</button>
+              <button class="btn-player" onclick="skipAudio(15)" title="Avancer de 15s">⏩</button>
+            </div>
+            <div class="progress-bar-container">
+              <span id="currentTimeLabel" class="time-label">00:00</span>
+              <input type="range" id="audioSeekbar" class="progress-bar" value="0" min="0" max="100" oninput="seekAudio(this.value)">
+              <span id="durationLabel" class="time-label">00:00</span>
+            </div>
+          </div>
+        `;
+
+        audioPlayer = new Audio(item.audioUrl);
+        audioPlayer.addEventListener('timeupdate', updateAudioProgress);
+        audioPlayer.addEventListener('ended', () => { isPlaying = false; updatePlayButtonUI(); });
+
+        descSection.innerHTML = `<div class="summary-card">${item.descriptionHtml || 'Résumé non disponible.'}</div>`;
+        toggleBtn.style.display = 'none';
       }
-      document.getElementById('modalOverlay').classList.add('active');
+
+      document.getElementById('mediaModal').classList.add('active');
     }
 
     function closeModal() {
-      document.getElementById('modalOverlay').classList.remove('active');
-      audioElement.pause();
+      document.getElementById('mediaModal').classList.remove('active');
+      stopAudio();
     }
 
-    function closeModalOnOverlay(e) {
-      if (e.target.id === 'modalOverlay') closeModal();
+    function closeModalOnBg(e) {
+      if (e.target.id === 'mediaModal') closeModal();
     }
 
-    function toggleDescription() {
-      const captionBox = document.getElementById('modalCaptionBox');
+    function moveCarousel(direction) {
+      if (!currentModalItem || !currentModalItem.images) return;
+      const totalImages = currentModalItem.images.length;
+      currentImgIndex += direction;
+      if (currentImgIndex < 0) currentImgIndex = 0;
+      if (currentImgIndex >= totalImages) currentImgIndex = totalImages - 1;
+
+      const track = document.getElementById('carouselTrack');
+      if (track) {
+        track.style.transform = `translateX(-${currentImgIndex * 100}%)`;
+      }
+
+      document.getElementById('prevBtn').classList.toggle('hidden', currentImgIndex === 0);
+      document.getElementById('nextBtn').classList.toggle('hidden', currentImgIndex === totalImages - 1);
+    }
+
+    function toggleFullDescription() {
+      isFullDescVisible = !isFullDescVisible;
+      const descSection = document.getElementById('modalDescriptionSection');
       const toggleBtn = document.getElementById('toggleDescBtn');
-      if (captionBox.style.display === 'none' || captionBox.style.display === '') {
-        captionBox.style.display = 'block';
-        toggleBtn.innerText = 'Masquer la description';
+
+      if (currentModalItem.type === 'youtube') {
+        if (isFullDescVisible) {
+          descSection.innerHTML = `<div class="card-caption" style="font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line;">${currentModalItem.fullCaption || ''}</div>`;
+          toggleBtn.innerText = '🔼 Réduire la description';
+        } else {
+          descSection.innerHTML = `<div class="card-caption" style="font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; max-height: 120px; overflow: hidden; text-overflow: ellipsis;">${currentModalItem.fullCaption || ''}</div>`;
+          toggleBtn.innerText = '📜 Lire la description complète';
+        }
+      }
+    }
+
+    // CONTRÔLES AUDIO PODCAST
+    function togglePlayAudio() {
+      if (!audioPlayer) return;
+      if (isPlaying) {
+        audioPlayer.pause();
+        isPlaying = false;
       } else {
-        captionBox.style.display = 'none';
-        toggleBtn.innerText = 'Afficher la description';
+        audioPlayer.play();
+        isPlaying = true;
       }
+      updatePlayButtonUI();
     }
 
-    function navigateModalCarousel(dir) {
-      if (!currentModalItem) return;
-      const images = (currentModalItem.images && currentModalItem.images.length > 0) ? currentModalItem.images : [currentModalItem.display_url || currentModalItem.imageUrl];
-      const track = document.getElementById('modalCarouselTrack');
-      const prevBtn = document.getElementById('modalPrevBtn');
-      const nextBtn = document.getElementById('modalNextBtn');
-      const total = images.length;
-
-      currentModalImgIndex += dir;
-      if (currentModalImgIndex >= total) currentModalImgIndex = 0;
-      else if (currentModalImgIndex < 0) currentModalImgIndex = total - 1;
-
-      track.style.transition = 'transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1)';
-      track.style.transform = `translateX(-${currentModalImgIndex * 100}%)`;
-
-      if (total > 1) {
-        prevBtn.classList.remove('hidden');
-        nextBtn.classList.remove('hidden');
+    function stopAudio() {
+      if (audioPlayer) {
+        audioPlayer.pause();
+        audioPlayer = null;
       }
+      isPlaying = false;
+      if (audioTimer) clearInterval(audioTimer);
     }
 
-    function setupAudioEvents() {
-      audioElement.ontimeupdate = () => {
-        if (!audioElement.duration) return;
-        const progress = (audioElement.currentTime / audioElement.duration) * 100;
-        audioProgressBar.value = progress;
-        currentTimeLabel.innerText = formatTime(audioElement.currentTime);
-      };
-
-      audioElement.onloadedmetadata = () => {
-        durationLabel.innerText = formatTime(audioElement.duration);
-      };
-
-      audioElement.onended = () => {
-        playPauseBtn.innerText = '▶';
-      };
-    }
-
-    function togglePlayPause() {
-      if (audioElement.paused) {
-        audioElement.play();
-        playPauseBtn.innerText = '⏸';
-      } else {
-        audioElement.pause();
-        playPauseBtn.innerText = '▶';
-      }
-    }
-
-    function seekAudio(val) {
-      if (!audioElement.duration) return;
-      audioElement.currentTime = (val / 100) * audioElement.duration;
+    function updatePlayButtonUI() {
+      const btn = document.getElementById('mainPlayBtn');
+      if (btn) btn.innerText = isPlaying ? '⏸' : '▶';
     }
 
     function skipAudio(seconds) {
-      audioElement.currentTime = Math.min(Math.max(audioElement.currentTime + seconds, 0), audioElement.duration);
+      if (audioPlayer) {
+        audioPlayer.currentTime += seconds;
+      }
     }
 
-    function formatTime(secs) {
-      const minutes = Math.floor(secs / 60);
-      const remainingSeconds = Math.floor(secs % 60);
-      return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    function seekAudio(value) {
+      if (audioPlayer && audioPlayer.duration) {
+        audioPlayer.currentTime = (value / 100) * audioPlayer.duration;
+      }
     }
 
-    window.onload = initApp;
+    function updateAudioProgress() {
+      if (!audioPlayer) return;
+      const current = audioPlayer.currentTime;
+      const duration = audioPlayer.duration || 0;
+
+      document.getElementById('currentTimeLabel').innerText = formatAudioTime(current);
+      document.getElementById('durationLabel').innerText = formatAudioTime(duration);
+
+      const seekbar = document.getElementById('audioSeekbar');
+      if (seekbar && duration > 0) {
+        seekbar.value = (current / duration) * 100;
+      }
+    }
+
+    function formatAudioTime(secs) {
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60);
+      return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+    }
   </script>
 </body>
 </html>
