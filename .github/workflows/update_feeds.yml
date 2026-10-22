@@ -1,40 +1,38 @@
 name: Mettre à jour les flux HugoDécrypte
 
 on:
+  # 1. Automatisation : Exécution toutes les 6 heures (soit 4 fois par jour maximum)
   schedule:
-    # S'exécute automatiquement toutes les 6 heures (vous pouvez ajuster)
     - cron: '0 */6 * * *'
-  workflow_dispatch: # Permet de lancer la mise à jour manuellement depuis GitHub
+  
+  # 2. Permet aussi de lancer la mise à jour manuellement depuis l'onglet "Actions" de GitHub
+  workflow_dispatch:
 
 jobs:
-  update:
+  update-data:
     runs-on: ubuntu-latest
+  
     steps:
-      - name: 📥 Récupérer le code du dépôt
-        uses: actions/checkout@v4
+      - name: Code source checkout
+        uses: actions/checkout@v3
 
-      - name: 🐍 Configurer Python
-        uses: actions/setup-python@v5
+      - name: Configurer Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: 📦 Installer les dépendances
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-
-      - name: 🚀 Lancer le script Instagram
-        env:
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+      - name: Lancer le script Instagram
         run: python fetch_instagram.py
 
-      - name: 🚀 Lancer la fusion des flux
+      - name: Lancer le script global (YouTube, Podcasts, Fusion)
         run: python fetch_all_feeds.py
 
-      - name: 💾 Commit et push des modifications sur GitHub
+      - name: Commit et push automatiques des nouveaux fichiers JSON
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-          git add public/ instagram_data.json all_media_data.json
-          git commit -m "🤖 Mise automatique des flux et des images" || echo "Pas de changements à commiter"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add all_media_data.json instagram_data.json public/all_media_data.json || true
+          git commit -m "Mise à jour automatique des flux [skip ci]" || echo "Aucun changement à commiter"
           git push
