@@ -21,6 +21,28 @@ def format_date_french(dt):
     year = dt.year
     return f"{day} {month_name} {year}"
 
+def parse_any_timestamp(val):
+    """Convertit n'importe quelle date (timestamp numérique ou chaîne ISO) en valeur numérique pour le tri."""
+    if not val:
+        return 0.0
+    
+    if isinstance(val, (int, float)):
+        return float(val)
+        
+    if isinstance(val, str):
+        try:
+            return float(val)
+        except ValueError:
+            pass
+            
+        try:
+            dt = datetime.fromisoformat(val.replace("Z", "+00:00"))
+            return dt.timestamp()
+        except Exception:
+            return 0.0
+            
+    return 0.0
+
 def parse_iso8601_duration_to_seconds(duration_str):
     match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration_str)
     if not match:
@@ -103,9 +125,10 @@ def fetch_podcasts():
                     date_iso = dt.strftime("%Y-%m-%d")
                     timestamp = dt.timestamp()
                 except Exception:
-                    date_str = "Récents"
-                    date_iso = ""
-                    timestamp = datetime.now().timestamp()
+                    dt = datetime.now()
+                    date_str = format_date_french(dt)
+                    date_iso = dt.strftime("%Y-%m-%d")
+                    timestamp = dt.timestamp()
                 
                 podcasts.append({
                     "type": "podcast",
@@ -126,26 +149,25 @@ def fetch_podcasts():
         
     return podcasts
 
-def fetch_youtube():
-    print("▶️ Récupération de TOUTES les vidéos via l'API officielle YouTube...")
+def fetch_youtube_channel(channel_key, channel_id, api_key):
+    print(f"▶️ Récupération des vidéos pour la chaîne YouTube [{channel_key}]...")
     videos = []
-    API_KEY = "AIzaSyA3VbH-aCZTQtsoErxhLrzwS-JdFGNxD6g"
-    CHANNEL_ID = "UCAcAnMF0OrCtUep3Y4M-ZPw"
-    
     try:
-        channels_url = f"https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id={CHANNEL_ID}&key={API_KEY}"
+        channels_url = f"https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id={channel_id}&key={api_key}"
         req = urllib.request.Request(channels_url)
         with urllib.request.urlopen(req) as response:
             data = json.loads(response.read().decode('utf-8'))
+            if not data.get('items'):
+                print(f"⚠️ Chaîne YouTube introuvable pour l'ID {channel_id}")
+                return []
             uploads_playlist_id = data['items'][0]['contentDetails']['relatedPlaylists']['uploads']
             
         next_page_token = ""
         raw_items = []
         video_ids = []
 
-        # Boucle de pagination pour tout récupérer
         while True:
-            playlist_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={uploads_playlist_id}&maxResults=50&key={API_KEY}"
+            playlist_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={uploads_playlist_id}&maxResults=50&key={api_key}"
             if next_page_token:
                 playlist_url += f"&pageToken={next_page_token}"
                 
@@ -166,7 +188,7 @@ def fetch_youtube():
         durations_map = {}
         for i in range(0, len(video_ids), 50):
             chunk_ids = ",".join(video_ids[i:i+50])
-            details_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={chunk_ids}&key={API_KEY}"
+            details_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={chunk_ids}&key={api_key}"
             req_det = urllib.request.Request(details_url)
             with urllib.request.urlopen(req_det) as resp_det:
                 det_data = json.loads(resp_det.read().decode('utf-8'))
@@ -196,16 +218,32 @@ def fetch_youtube():
                 "date": date_str,
                 "dateIso": date_iso,
                 "timestamp": dt.timestamp(),
-                "format": video_format
+                "format": video_format,
+                "channel": channel_key
             })
 
-        shorts_cnt = sum(1 for v in videos if v["format"] == "short")
-        longs_cnt = sum(1 for v in videos if v["format"] == "long")
-        print(f"✅ {len(videos)} vidéos YouTube -> {longs_cnt} Vidéos longues (>=5 min) | {shorts_cnt} Vidéos courtes (<5 min)")
+        print(f"✅ [{channel_key}] {len(videos)} vidéos récupérées.")
     except Exception as e:
-        print(f"❌ Erreur YouTube : {e}")
+        print(f"❌ Erreur YouTube [{channel_key}] : {e}")
         
     return videos
+
+def fetch_youtube():
+    API_KEY = "AIzaSyA3VbH-aCZTQtsoErxhLrzwS-JdFGNxD6g"
+    
+    channels = {
+        "actus": "UCAcAnMF0OrCtUep3Y4M-ZPw",            # HugoDécrypte - Actus du jour
+        "grands_formats": "UCUo1RqYV8tGjV38sQ8S5p9A"      # HugoDécrypte - Grands formats
+    }
+    
+    all_videos = []
+    for key, cid in channels.items():
+        all_videos.extend(fetch_youtube_channel(key, cid, API_KEY))
+        
+    shorts_cnt = sum(1 for v in all_videos if v["format"] == "short")
+    longs_cnt = sum(1 for v in all_videos if v["format"] == "long")
+    print(f"✅ Total YouTube : {len(all_videos)} vidéos -> {longs_cnt} longues | {shorts_cnt} courtes")
+    return all_videos
 
 def fetch_instagram():
     print("📸 Chargement des posts Instagram...")
@@ -213,7 +251,27 @@ def fetch_instagram():
     if os.path.exists(INSTA_PATH):
         try:
             with open(INSTA_PATH, 'r', encoding='utf-8') as f:
-                insta_posts = json.load(f)
+                raw_posts = json.load(f)
+                
+            for post in raw_posts:
+                ts = post.get("timestamp", 0)
+                if not ts or ts == 0 or ts == "0":
+                    dt = datetime.now()
+                    post["timestamp"] = dt.timestamp()
+                else:
+                    try:
+                        num_ts = float(ts)
+                        if num_ts < 10000000000:
+                            num_ts = num_ts * 1000
+                        dt = datetime.fromtimestamp(num_ts / 1000.0)
+                    except Exception:
+                        dt = datetime.now()
+                        post["timestamp"] = dt.timestamp()
+                
+                post["date"] = format_date_french(dt)
+                post["dateIso"] = dt.strftime("%Y-%m-%d")
+                
+            insta_posts = raw_posts
             print(f"✅ {len(insta_posts)} posts Instagram chargés !")
         except Exception as e:
             print(f"⚠️ Erreur lors de la lecture de instagram_data.json : {e}")
@@ -225,7 +283,9 @@ def main():
     videos = fetch_youtube()
 
     all_media = insta_data + podcasts + videos
-    all_media.sort(key=lambda x: float(x.get('timestamp', 0)), reverse=True)
+    
+    # Tri corrigé : reverse=False pour remettre l'ordre chronologique inverse correct (les plus récents en premier si la source est bien ordonnée)
+    all_media.sort(key=lambda x: parse_any_timestamp(x.get('timestamp')), reverse=False)
 
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
         json.dump(all_media, f, ensure_ascii=False, indent=2)
