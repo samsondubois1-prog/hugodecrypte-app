@@ -1,11 +1,10 @@
 name: Mettre à jour les flux HugoDécrypte
 
 on:
-  # 1. Automatisation : Exécution toutes les 6 heures (soit 4 fois par jour maximum)
   schedule:
-    - cron: '0 */6 * * *'
+    # 8h00 UTC et 14h00 UTC (ce qui correspond à 10h00 et 16h00 en France)
+    - cron: '0 8,14 * * *'
   
-  # 2. Permet aussi de lancer la mise à jour manuellement depuis l'onglet "Actions" de GitHub
   workflow_dispatch:
 
 jobs:
