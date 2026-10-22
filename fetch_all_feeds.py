@@ -22,25 +22,20 @@ def format_date_french(dt):
     return f"{day} {month_name} {year}"
 
 def parse_any_timestamp(val):
-    """Convertit n'importe quelle date (timestamp numérique ou chaîne ISO) en valeur numérique pour le tri."""
     if not val:
         return 0.0
-    
     if isinstance(val, (int, float)):
         return float(val)
-        
     if isinstance(val, str):
         try:
             return float(val)
         except ValueError:
             pass
-            
         try:
             dt = datetime.fromisoformat(val.replace("Z", "+00:00"))
             return dt.timestamp()
         except Exception:
             return 0.0
-            
     return 0.0
 
 def parse_iso8601_duration_to_seconds(duration_str):
@@ -230,19 +225,13 @@ def fetch_youtube_channel(channel_key, channel_id, api_key):
 
 def fetch_youtube():
     API_KEY = "AIzaSyA3VbH-aCZTQtsoErxhLrzwS-JdFGNxD6g"
-    
     channels = {
-        "actus": "UCAcAnMF0OrCtUep3Y4M-ZPw",            # HugoDécrypte - Actus du jour
-        "grands_formats": "UCUo1RqYV8tGjV38sQ8S5p9A"      # HugoDécrypte - Grands formats
+        "actus": "UCAcAnMF0OrCtUep3Y4M-ZPw",
+        "grands_formats": "UCUo1RqYV8tGjV38sQ8S5p9A"
     }
-    
     all_videos = []
     for key, cid in channels.items():
         all_videos.extend(fetch_youtube_channel(key, cid, API_KEY))
-        
-    shorts_cnt = sum(1 for v in all_videos if v["format"] == "short")
-    longs_cnt = sum(1 for v in all_videos if v["format"] == "long")
-    print(f"✅ Total YouTube : {len(all_videos)} vidéos -> {longs_cnt} longues | {shorts_cnt} courtes")
     return all_videos
 
 def fetch_instagram():
@@ -284,8 +273,8 @@ def main():
 
     all_media = insta_data + podcasts + videos
     
-    # Tri corrigé : reverse=False pour remettre l'ordre chronologique inverse correct (les plus récents en premier si la source est bien ordonnée)
-    all_media.sort(key=lambda x: parse_any_timestamp(x.get('timestamp')), reverse=False)
+    # Tri corrigé en reverse=True pour afficher les plus récents en premier
+    all_media.sort(key=lambda x: parse_any_timestamp(x.get('timestamp')), reverse=True)
 
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
         json.dump(all_media, f, ensure_ascii=False, indent=2)
