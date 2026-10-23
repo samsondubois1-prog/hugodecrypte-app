@@ -102,7 +102,7 @@
     .card.clickable { cursor: pointer; }
     .card:hover { transform: translateY(-6px); border-color: #3f4657; box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45); }
 
-    /* INSTAGRAM BUREAU */
+    /* VIGNETTE INSTAGRAM BUREAU : RESSERRÉE SUR LES BORDS VERTICAUX */
     .card-insta {
       position: relative; border-radius: 18px; overflow: hidden; background: #000; display: flex; flex-direction: column;
     }
@@ -110,7 +110,7 @@
       width: 100%; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
     .card-insta .insta-img-container img {
-      width: 100%; height: auto; max-height: 420px; object-fit: contain; display: block;
+      width: 100%; height: auto; display: block; object-fit: contain;
     }
     .card-insta .insta-overlay {
       width: 100%; padding: 10px 16px; background: rgba(15, 17, 21, 0.95);
@@ -143,9 +143,9 @@
     
     body.mobile-mode .card-insta { border-radius: 10px; }
     body.mobile-mode .card-insta .insta-img-container { 
-      width: 100%; height: 140px; background: #000; display: flex; align-items: center; justify-content: center; 
+      width: 100%; height: auto; background: #000; display: flex; align-items: center; justify-content: center; 
     }
-    body.mobile-mode .card-insta .insta-img-container img { width: 100%; height: 100%; object-fit: contain; }
+    body.mobile-mode .card-insta .insta-img-container img { width: 100%; height: auto; object-fit: contain; }
     body.mobile-mode .card-insta .insta-overlay { 
       position: relative; width: 100%; padding: 4px 8px; background: rgba(15, 17, 21, 0.98); 
       border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end; align-items: center; 
@@ -193,27 +193,37 @@
     .modal-body { padding: 25px 30px; overflow-y: auto; }
     .modal-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     
-    /* MODALE SPOTIFY STYLE POUR LES PODCASTS */
+    /* MODALE SPOTIFY PURE AVEC NOUVEAUX BOUTONS */
     .spotify-podcast-player {
       background: linear-gradient(135deg, #121212 0%, #1db954 100%);
-      padding: 35px 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; width: 100%;
+      padding: 35px 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; width: 100%;
     }
     .spotify-artwork {
-      width: 140px; height: 140px; border-radius: 12px; background: #282828; display: flex; align-items: center; justify-content: center;
-      font-size: 3.5rem; box-shadow: 0 12px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+      width: 130px; height: 130px; border-radius: 12px; background: #282828; display: flex; align-items: center; justify-content: center;
+      font-size: 3.2rem; box-shadow: 0 12px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
     }
     .spotify-info { text-align: center; max-width: 90%; }
     .spotify-title { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 6px; line-height: 1.3; }
     .spotify-subtitle { font-size: 0.85rem; color: #b3b3b3; }
     
-    .spotify-controls { display: flex; align-items: center; gap: 25px; margin-top: 5px; }
-    .spotify-btn-ctrl { background: transparent; border: none; color: #b3b3b3; font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
-    .spotify-btn-ctrl:hover { color: #fff; }
-    .spotify-play-btn {
-      background: #1ed760; color: #000; width: 54px; height: 54px; border-radius: 50%; border: none;
-      display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s, background 0.2s;
+    .spotify-controls { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 5px; }
+    .spotify-btn-circle {
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;
+      width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
     }
-    .spotify-play-btn:hover { transform: scale(1.05); background: #1fdf64; }
+    .spotify-btn-circle:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.05); }
+    
+    .spotify-btn-nav {
+      background: transparent; border: none; color: #b3b3b3; font-size: 1.3rem; cursor: pointer; transition: color 0.2s; padding: 0 4px;
+    }
+    .spotify-btn-nav:hover { color: #fff; }
+
+    .spotify-play-btn {
+      background: #1ed760; color: #000; width: 56px; height: 56px; border-radius: 50%; border: none;
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s, background 0.2s; box-shadow: 0 6px 20px rgba(30, 215, 96, 0.4);
+    }
+    .spotify-play-btn:hover { transform: scale(1.06); background: #1fdf64; }
 
     .spotify-progress-container { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 450px; margin-top: 5px; }
     .spotify-time { font-size: 0.75rem; color: #a7a7a7; font-family: monospace; min-width: 38px; }
@@ -298,7 +308,6 @@
     <div id="feedGrid" class="feed-grid"></div>
   </main>
 
-  <!-- MODALE -->
   <div id="mediaModal" class="modal-overlay" onclick="closeModalOnBg(event)">
     <div class="modal-card">
       <button class="modal-close-btn" onclick="closeModal()">✕</button>
@@ -310,7 +319,6 @@
           <span id="modalBadge" class="badge"></span>
           <span id="modalDate" class="card-date"></span>
         </div>
-        <!-- Le titre complet avec "..." est supprimé de la modale comme demandé -->
 
         <div id="modalDescriptionSection"></div>
 
@@ -532,7 +540,6 @@
 
         if (item.type === 'instagram') {
           let imageUrl = item.imageUrl || (item.images && item.images[0]) || '';
-          // Compteur d'images retiré de la grille, seule la date est affichée à droite
           card.innerHTML = `
             <div class="insta-img-container">
               <img src="${imageUrl}" alt="Instagram" loading="lazy">
@@ -633,7 +640,7 @@
         modalBadge.innerText = `Podcast • ${item.theme || 'Infos'}`;
         extLink.style.display = 'none';
 
-        // DESIGN SPOTIFY STYLE POUR LA MODALE PODCAST
+        // LECTEUR SPOTIFY PROPRE AVEC NOUVEAUX BOUTONS
         modalContainer.innerHTML = `
           <div class="spotify-podcast-player">
             <div class="spotify-artwork">🎙️</div>
@@ -642,12 +649,14 @@
               <div class="spotify-subtitle">HugoDécrypte • ${item.theme || 'Podcast'}</div>
             </div>
             <div class="spotify-controls">
-              <button class="spotify-btn-ctrl" onclick="skipAudio(-15)" title="Reculer de 15s">⏪</button>
+              <button class="spotify-btn-nav" onclick="navigatePodcast(-1)" title="Podcast précédent">⏮</button>
+              <button class="spotify-btn-circle" onclick="skipAudio(-15)" title="Reculer de 15s">-15s</button>
               <button id="mainPlayBtn" class="spotify-play-btn" onclick="togglePlayAudio()">▶</button>
-              <button class="spotify-btn-ctrl" onclick="skipAudio(15)" title="Avancer de 15s">⏩</button>
+              <button class="spotify-btn-circle" onclick="skipAudio(15)" title="Avancer de 15s">+15s</button>
+              <button class="spotify-btn-nav" onclick="navigatePodcast(1)" title="Podcast suivant">⏭</button>
             </div>
             <div class="spotify-progress-container">
-              <span id="currentTimeLabel" class="spotify-time">00:00</span>
+              <span id="currentTimeLabel" class="spotify-time">01:00</span>
               <input type="range" id="audioSeekbar" class="spotify-slider" value="0" min="0" max="100" oninput="seekAudio(this.value)">
               <span id="durationLabel" class="spotify-time">00:00</span>
             </div>
@@ -655,6 +664,15 @@
         `;
 
         audioPlayer = new Audio(item.audioUrl);
+        
+        // Démarrage automatique à partir de 1 minute (60s)
+        audioPlayer.addEventListener('loadedmetadata', () => {
+          if (audioPlayer.duration > 60) {
+            audioPlayer.currentTime = 60;
+          }
+          updateAudioProgress();
+        });
+
         audioPlayer.addEventListener('timeupdate', updateAudioProgress);
         audioPlayer.addEventListener('ended', () => { isPlaying = false; updatePlayButtonUI(); });
       }
@@ -718,15 +736,40 @@
       }
     }
 
+    // NAVIGATION ENTRE PODCASTS (SUIVANT / PRÉCÉDENT)
+    function navigatePodcast(direction) {
+      if (!currentModalItem || currentModalItem.type !== 'podcast') return;
+      
+      const podcasts = allMedia.filter(i => (i.type || 'instagram') === 'podcast');
+      const currentIndex = podcasts.findIndex(i => i.id === currentModalItem.id);
+
+      if (currentIndex !== -1) {
+        let newIndex = currentIndex + direction;
+        if (newIndex < 0) newIndex = podcasts.length - 1;
+        if (newIndex >= podcasts.length) newIndex = 0;
+        
+        openModal(podcasts[newIndex]);
+        togglePlayAudio(); // Lancement direct
+      }
+    }
+
     function togglePlayAudio() {
       if (!audioPlayer) return;
-      if (isPlaying) { audioPlayer.pause(); isPlaying = false; }
-      else { audioPlayer.play(); isPlaying = true; }
+      if (isPlaying) { 
+        audioPlayer.pause(); 
+        isPlaying = false; 
+      } else { 
+        audioPlayer.play(); 
+        isPlaying = true; 
+      }
       updatePlayButtonUI();
     }
 
     function stopAudio() {
-      if (audioPlayer) { audioPlayer.pause(); audioPlayer = null; }
+      if (audioPlayer) { 
+        audioPlayer.pause(); 
+        audioPlayer = null; 
+      }
       isPlaying = false;
     }
 
@@ -750,8 +793,11 @@
       const current = audioPlayer.currentTime;
       const duration = audioPlayer.duration || 0;
 
-      document.getElementById('currentTimeLabel').innerText = formatAudioTime(current);
-      document.getElementById('durationLabel').innerText = formatAudioTime(duration);
+      const currentTimeLabel = document.getElementById('currentTimeLabel');
+      const durationLabel = document.getElementById('durationLabel');
+
+      if (currentTimeLabel) currentTimeLabel.innerText = formatAudioTime(current);
+      if (durationLabel) durationLabel.innerText = formatAudioTime(duration);
 
       const seekbar = document.getElementById('audioSeekbar');
       if (seekbar && duration > 0) {
