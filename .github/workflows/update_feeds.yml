@@ -2,7 +2,6 @@ name: Mettre à jour les flux HugoDécrypte
 
 on:
   schedule:
-    # 8h00 UTC et 14h00 UTC (10h00 et 16h00 heure française)
     - cron: '0 8,14 * * *'
   
   workflow_dispatch:
@@ -10,7 +9,11 @@ on:
 jobs:
   update-data:
     runs-on: ubuntu-latest
-  
+    
+    # Autorise explicitement l'écriture pour le job
+    permissions:
+      contents: write
+
     steps:
       - name: Code source checkout
         uses: actions/checkout@v3
@@ -39,6 +42,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git add all_media_data.json instagram_data.json public/all_media_data.json || true
           git commit -m "Mise à jour automatique des flux [skip ci]" || echo "Aucun changement à commiter"
           git push
