@@ -84,7 +84,6 @@ def fetch_instagram_data():
             if not images:
                 continue
 
-            # Statistiques pour le calcul de tendance
             likes = item.get("likesCount") or item.get("likes_count") or 0
             comments = item.get("commentsCount") or item.get("comments_count") or 0
             engagement_score = likes + (comments * 2)
@@ -104,7 +103,7 @@ def fetch_instagram_data():
                 "timestamp": dt.timestamp()
             })
 
-        # Tri chronologique principal
+        # Tri chronologique principal du plus récent au plus ancien
         posts.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
 
         with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:

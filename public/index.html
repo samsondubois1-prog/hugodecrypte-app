@@ -102,7 +102,7 @@
     .card.clickable { cursor: pointer; }
     .card:hover { transform: translateY(-6px); border-color: #3f4657; box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45); }
 
-    /* CORRECTION DESIGN : VIGNETTE RESSERRÉE AU BORD DE L'IMAGE */
+    /* VIGNETTE RESSERRÉE AU BORD DE L'IMAGE */
     .card-insta {
       position: relative; border-radius: 18px; overflow: hidden; background: #000; display: flex; flex-direction: column;
     }
@@ -229,7 +229,7 @@
 
     <div id="trendingBanner" class="trending-banner" style="display: none;" onclick="openTrendingItem()">
       <div class="trending-content">
-        <span class="trending-label">🔥 À LA UNE DU JOUR (Plus populaire)</span>
+        <span class="trending-label">🔥 À LA UNE DU JOUR (Plus populaire du jour)</span>
         <span class="trending-title" id="trendingTitle">Calcul de la tendance...</span>
       </div>
       <span class="trending-badge-action">Découvrir</span>
@@ -376,18 +376,25 @@
       }
     }
 
-    // CORRECTION : CALCUL DE LA TENDANCE PAR LIKES / COMMENTAIRES
+    // CALCUL DE LA TENDANCE STRICTEMENT RESTREINT AU JOUR COURANT
     function computeTrendingOfTheDay() {
       if (!allMedia || allMedia.length === 0) return;
       const instaItems = allMedia.filter(i => (i.type || 'instagram') === 'instagram');
-      
-      if (instaItems.length > 0) {
-        // Trouver celui avec le plus grand score d'engagement (likes + commentaires)
-        trendingItemData = instaItems.reduce((max, item) => {
+      if (instaItems.length === 0) return;
+
+      // Date du post le plus récent du flux (considéré comme aujourd'hui)
+      const latestDateIso = instaItems[0].dateIso;
+
+      // Filtrer uniquement les posts appartenant à cette journée
+      const todayItems = instaItems.filter(i => i.dateIso === latestDateIso);
+
+      if (todayItems.length > 0) {
+        // Trouver le plus populaire du jour (likes + commentaires)
+        trendingItemData = todayItems.reduce((max, item) => {
           const score = item.engagementScore || item.likes || 0;
           const maxScore = max.engagementScore || max.likes || 0;
           return score > maxScore ? item : max;
-        }, instaItems[0]);
+        }, todayItems[0]);
 
         const titleText = trendingItemData.title || trendingItemData.caption || "Post Instagram à la une";
         const statsInfo = trendingItemData.likes ? ` (${trendingItemData.likes.toLocaleString('fr-FR')} likes)` : '';
@@ -635,7 +642,7 @@
         audioPlayer.addEventListener('ended', () => { isPlaying = false; updatePlayButtonUI(); });
       }
 
-      // GESTION DU BOUTON SYSTEMATIQUE : AFFICHER / MASQUER LA DESCRIPTION
+      // BOUTON UNIVERSEL : AFFICHER / MASQUER LA DESCRIPTION
       if (captionText && captionText.trim().length > 0) {
         descSection.innerHTML = `
           <div class="modal-caption-container">
@@ -661,14 +668,13 @@
       if (e.target.id === 'mediaModal') closeModal();
     }
 
-    // ANIMATION CARROUSEL : REMBOBINAGE EN BOUCLE DU DERNIER AU PREMIER
+    // ANIMATION CARROUSEL : BOUCLE DU DERNIER AU PREMIER
     function moveCarousel(direction) {
       if (!currentModalItem || !currentModalItem.images) return;
       const totalImages = currentModalItem.images.length;
       
       currentImgIndex += direction;
 
-      // Boucle fluide : du dernier vers le premier
       if (currentImgIndex >= totalImages) {
         currentImgIndex = 0;
       } else if (currentImgIndex < 0) {
