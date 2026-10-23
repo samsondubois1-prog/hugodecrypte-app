@@ -15,7 +15,7 @@ def format_date_french(dt):
     return f"{dt.day} {MONTHS_FR[dt.month]} {dt.year}"
 
 def fetch_instagram_data():
-    print("📸 Récupération des posts Instagram via Apify (sans les Reels)...")
+    print("📸 Récupération des posts Instagram via Apify...")
     token = os.environ.get("APIFY_TOKEN")
     if not token:
         print("❌ Token APIFY manquant.")
@@ -33,13 +33,12 @@ def fetch_instagram_data():
         }
         
         client.actor("apify/instagram-scraper").call(run_input=run_input)
-        
         actor_client = client.actor("apify/instagram-scraper")
         dataset_items = actor_client.last_run().dataset().list_items().items
         
         posts = []
         for item in dataset_items:
-            # FILTRE : On ignore les Reels / Vidéos isolées si on ne veut que les posts
+            # FILTRE : Exclure les reels / vidéos isolées
             is_reel = item.get("isVideo") or item.get("type") == "Video" or "/reel/" in item.get("url", "")
             if is_reel:
                 continue
@@ -64,13 +63,12 @@ def fetch_instagram_data():
                 except Exception:
                     pass
 
-            # Récupération et nettoyage des doublons d'images
+            # Déduplication des images
             raw_images = []
             if item.get("displayUrl"):
                 raw_images.append(item.get("displayUrl"))
-            if item.get("images"):
-                if isinstance(item.get("images"), list):
-                    raw_images.extend(item.get("images"))
+            if item.get("images") and isinstance(item.get("images"), list):
+                raw_images.extend(item.get("images"))
             if item.get("childPosts"):
                 for child in item.get("childPosts"):
                     if child.get("displayUrl"):
@@ -78,7 +76,6 @@ def fetch_instagram_data():
             if not raw_images and item.get("imageUrl"):
                 raw_images = [item.get("imageUrl")]
 
-            # Supprimer les doublons exacts d'URL d'images tout en gardant l'ordre
             images = []
             for img in raw_images:
                 if img and img not in images:
@@ -87,6 +84,11 @@ def fetch_instagram_data():
             if not images:
                 continue
 
+            # Statistiques pour le calcul de tendance
+            likes = item.get("likesCount") or item.get("likes_count") or 0
+            comments = item.get("commentsCount") or item.get("comments_count") or 0
+            engagement_score = likes + (comments * 2)
+
             posts.append({
                 "type": "instagram",
                 "id": item.get("id") or item.get("shortCode"),
@@ -94,18 +96,21 @@ def fetch_instagram_data():
                 "fullCaption": item.get("caption", ""),
                 "imageUrl": images[0],
                 "images": images,
+                "likes": likes,
+                "comments": comments,
+                "engagementScore": engagement_score,
                 "date": format_date_french(dt),
                 "dateIso": dt.strftime("%Y-%m-%d"),
                 "timestamp": dt.timestamp()
             })
 
-        # Tri strict du plus récent au plus ancien
+        # Tri chronologique principal
         posts.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
 
         with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
             json.dump(posts, f, ensure_ascii=False, indent=2)
             
-        print(f"✅ {len(posts)} posts Instagram (sans Reels) enregistrés avec succès.")
+        print(f"✅ {len(posts)} posts Instagram enregistrés avec succès.")
         return posts
     except Exception as e:
         print(f"❌ Erreur lors de l'appel Apify : {e}")

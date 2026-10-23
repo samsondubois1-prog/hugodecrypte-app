@@ -36,34 +36,17 @@
     }
     header p { color: var(--text-muted); font-size: 1rem; }
 
-    .view-toggle-container {
-      margin-top: 15px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
+    .view-toggle-container { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
     .view-toggle-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: all 0.2s ease;
+      background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted);
+      padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s ease;
     }
-    .view-toggle-btn.active {
-      background: var(--accent-trend);
-      color: #fff;
-      border-color: var(--accent-trend);
-    }
+    .view-toggle-btn.active { background: var(--accent-trend); color: #fff; border-color: var(--accent-trend); }
 
     .search-container { max-width: 500px; margin: 20px auto 0 auto; position: relative; }
     .search-input {
       width: 100%; padding: 12px 42px 12px 18px; background: var(--card-bg);
-      border: 1px solid var(--border); border-radius: 30px; color: var(--text-main);
-      font-size: 0.95rem; outline: none; transition: border-color 0.25s ease;
+      border: 1px solid var(--border); border-radius: 30px; color: var(--text-main); font-size: 0.95rem; outline: none; transition: border-color 0.25s ease;
     }
     .search-input:focus { border-color: var(--accent-trend); }
     .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
@@ -72,8 +55,7 @@
       max-width: 800px; margin: 20px auto 0 auto;
       background: linear-gradient(135deg, rgba(225, 48, 108, 0.15) 0%, rgba(22, 25, 32, 0.9) 100%);
       border: 1px solid rgba(225, 48, 108, 0.35); border-radius: 16px; padding: 16px 20px;
-      display: flex; align-items: center; justify-content: space-between; gap: 15px; cursor: pointer;
-      transition: all 0.25s ease;
+      display: flex; align-items: center; justify-content: space-between; gap: 15px; cursor: pointer; transition: all 0.25s ease;
     }
     .trending-banner:hover { border-color: rgba(225, 48, 108, 0.8); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(225, 48, 108, 0.2); }
     .trending-content { display: flex; flex-direction: column; gap: 4px; text-align: left; }
@@ -86,16 +68,14 @@
     
     .tab-btn {
       padding: 10px 22px; border: 1px solid var(--border); background: var(--card-bg);
-      color: var(--text-muted); border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
-      transition: all 0.25s ease;
+      color: var(--text-muted); border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.25s ease;
     }
     .tab-btn:hover { border-color: #3f4657; color: var(--text-main); }
     .tab-btn.active { background: var(--text-main); color: #000; border-color: var(--text-main); }
 
     .sub-tab-btn {
       padding: 6px 16px; border: 1px solid var(--border); background: #1a1d26;
-      color: var(--text-muted); border-radius: 20px; cursor: pointer; font-weight: 500; font-size: 0.82rem;
-      transition: all 0.2s ease;
+      color: var(--text-muted); border-radius: 20px; cursor: pointer; font-weight: 500; font-size: 0.82rem; transition: all 0.2s ease;
     }
     .sub-tab-btn:hover { border-color: var(--text-main); color: var(--text-main); }
     .sub-tab-btn.active-pod { background: var(--accent-pod); color: #000; border-color: var(--accent-pod); font-weight: 700; }
@@ -109,8 +89,7 @@
 
     .refresh-btn {
       background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main);
-      padding: 8px 16px; border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 0.88rem;
-      display: flex; align-items: center; gap: 6px; transition: all 0.25s ease;
+      padding: 8px 16px; border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; transition: all 0.25s ease;
     }
     .refresh-btn:hover { border-color: #6366f1; background: #1e222d; }
 
@@ -123,18 +102,18 @@
     .card.clickable { cursor: pointer; }
     .card:hover { transform: translateY(-6px); border-color: #3f4657; box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45); }
 
-    /* AFFICHAGE INSTAGRAM : IMAGE EN ENTIER CONTRE LES BORDS */
+    /* CORRECTION DESIGN : VIGNETTE RESSERRÉE AU BORD DE L'IMAGE */
     .card-insta {
-      position: relative; border-radius: 18px; overflow: hidden; background: #161920; display: flex; flex-direction: column;
+      position: relative; border-radius: 18px; overflow: hidden; background: #000; display: flex; flex-direction: column;
     }
     .card-insta .insta-img-container {
-      width: 100%; height: 320px; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0;
+      width: 100%; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
     .card-insta .insta-img-container img {
-      width: 100%; height: 100%; object-fit: contain; display: block;
+      width: 100%; height: auto; max-height: 420px; object-fit: cover; display: block;
     }
     .card-insta .insta-overlay {
-      width: 100%; padding: 10px 14px; background: rgba(15, 17, 21, 0.98);
+      width: 100%; padding: 12px 16px; background: rgba(15, 17, 21, 0.95);
       border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; margin-top: auto;
     }
 
@@ -156,15 +135,10 @@
     .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px; margin-top: auto; }
     .card-date { font-size: 0.78rem; color: #cbd5e1; font-weight: 600; }
 
-    /* MODE INTERFACE TÉLÉPHONE : 3 PAR LIGNE */
+    /* MODE INTERFACE TÉLÉPHONE */
     body.mobile-mode { padding: 10px 4px; }
     body.mobile-mode header h1 { font-size: 1.4rem; }
-    body.mobile-mode .feed-grid { 
-      grid-template-columns: repeat(3, 1fr) !important; 
-      gap: 8px !important; 
-      max-width: 100%; 
-      padding: 0 4px; 
-    }
+    body.mobile-mode .feed-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; max-width: 100%; padding: 0 4px; }
     body.mobile-mode .card { border-radius: 10px; }
     body.mobile-mode .card-body { padding: 8px; }
     body.mobile-mode .card-title { font-size: 0.75rem; line-height: 1.2; margin-bottom: 4px; }
@@ -172,13 +146,13 @@
     body.mobile-mode .badge { font-size: 0.6rem; padding: 2px 6px; }
     body.mobile-mode .card-date { font-size: 0.65rem; }
     body.mobile-mode .media-box { height: 100px; }
-    body.mobile-mode .card-insta .insta-img-container { height: 130px; }
+    body.mobile-mode .card-insta .insta-img-container img { max-height: 140px; }
     body.mobile-mode .controls-container { flex-direction: column; gap: 8px; }
     body.mobile-mode .tabs-container { width: 100%; justify-content: center; }
     body.mobile-mode .tab-btn { padding: 6px 10px; font-size: 0.78rem; }
     body.mobile-mode .sub-tab-btn { padding: 4px 10px; font-size: 0.72rem; }
 
-    /* MODALE AVEC ANIMATION DE DÉFILEMENT FLUIDE */
+    /* MODALE */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
     .modal-overlay.active { display: flex; }
     
@@ -193,7 +167,7 @@
     .modal-close-btn:hover { background: rgba(255, 255, 255, 0.25); }
 
     .modal-media-box { position: relative; width: 100%; height: 500px; background: #000; overflow: hidden; display: flex; }
-    .carousel-track { display: flex; height: 100%; width: 100%; will-change: transform; transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); }
+    .carousel-track { display: flex; height: 100%; width: 100%; will-change: transform; transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1); }
     .carousel-track img { width: 100%; height: 100%; object-fit: contain; flex-shrink: 0; }
     
     .carousel-nav-btn {
@@ -204,16 +178,18 @@
     .carousel-nav-btn:hover { background: rgba(0, 0, 0, 0.95); }
     .carousel-nav-btn.prev { left: 15px; } 
     .carousel-nav-btn.next { right: 15px; }
-    .carousel-nav-btn.hidden { display: none !important; }
 
     .modal-body { padding: 25px 30px; overflow-y: auto; }
     .modal-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .modal-title { font-size: 1.35rem; font-weight: 800; line-height: 1.3; color: var(--text-main); }
-    .modal-footer-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+    
+    .modal-caption-container { margin-top: 15px; }
+    .modal-caption-text { font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; }
+    .modal-caption-text.collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
     .toggle-desc-btn {
       background: #1e2430; border: 1px solid #333b4d; color: #cbd5e1; padding: 10px 18px; border-radius: 12px;
-      cursor: pointer; font-size: 0.88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease;
+      cursor: pointer; font-size: 0.88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; margin-top: 12px;
     }
     .toggle-desc-btn:hover { background: #283040; color: #fff; border-color: #4a5568; }
 
@@ -251,10 +227,9 @@
       <span class="search-icon">🔍</span>
     </div>
 
-    <!-- TENDANCE : INSTAGRAM -->
     <div id="trendingBanner" class="trending-banner" style="display: none;" onclick="openTrendingItem()">
       <div class="trending-content">
-        <span class="trending-label">🔥 À la une Instagram du jour</span>
+        <span class="trending-label">🔥 À LA UNE DU JOUR (Plus populaire)</span>
         <span class="trending-title" id="trendingTitle">Calcul de la tendance...</span>
       </div>
       <span class="trending-badge-action">Découvrir</span>
@@ -273,7 +248,6 @@
         <button class="reset-date-btn" title="Réinitialiser" onclick="resetDateFilter()">✕</button>
       </div>
 
-      <!-- BOUTON RAFRAÎCHIR SÉCURISÉ -->
       <button class="refresh-btn" onclick="manualRefreshData()" title="Actualiser le site">
         🔄 Rafraîchir
       </button>
@@ -302,7 +276,6 @@
     <div id="feedGrid" class="feed-grid"></div>
   </main>
 
-  <!-- MODALE -->
   <div id="mediaModal" class="modal-overlay" onclick="closeModalOnBg(event)">
     <div class="modal-card">
       <button class="modal-close-btn" onclick="closeModal()">✕</button>
@@ -318,12 +291,12 @@
 
         <div id="modalDescriptionSection"></div>
 
-        <div class="modal-footer-controls">
+        <div class="modal-footer-controls" style="display: flex; justify-content: space-between; align-items: center;">
           <button id="toggleDescBtn" class="toggle-desc-btn" onclick="toggleFullDescription()" style="display: none;">
-            📜 Lire la description complète
+            📜 Voir plus
           </button>
           <a id="modalExternalLink" href="#" target="_blank" class="toggle-desc-btn" style="text-decoration: none; display: none;">
-            🔗 Ouvrir sur la plateforme originale
+            🔗 Ouvrir le lien
           </a>
         </div>
       </div>
@@ -348,9 +321,7 @@
     let audioPlayer = null;
     let isPlaying = false;
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadData();
-    });
+    window.addEventListener('DOMContentLoaded', () => { loadData(); });
 
     async function loadData() {
       try {
@@ -361,7 +332,7 @@
         computeTrendingOfTheDay();
         renderFeed();
       } catch (err) {
-        console.error("Erreur de chargement :", err);
+        console.error("Erreur :", err);
         document.getElementById('feedGrid').innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 40px;">Impossible de charger les actualités.</div>`;
       }
     }
@@ -386,7 +357,7 @@
       localStorage.setItem('hugo_refresh_count', refreshCount);
 
       await loadData();
-      alert("🔄 Actualisation réussie ! Les dernières données ont été rechargées.");
+      alert("🔄 Actualisation réussie !");
     }
 
     function switchInterface(mode) {
@@ -405,14 +376,22 @@
       }
     }
 
+    // CORRECTION : CALCUL DE LA TENDANCE PAR LIKES / COMMENTAIRES
     function computeTrendingOfTheDay() {
       if (!allMedia || allMedia.length === 0) return;
       const instaItems = allMedia.filter(i => (i.type || 'instagram') === 'instagram');
-      trendingItemData = instaItems.length > 0 ? instaItems[0] : null;
+      
+      if (instaItems.length > 0) {
+        // Trouver celui avec le plus grand score d'engagement (likes + commentaires)
+        trendingItemData = instaItems.reduce((max, item) => {
+          const score = item.engagementScore || item.likes || 0;
+          const maxScore = max.engagementScore || max.likes || 0;
+          return score > maxScore ? item : max;
+        }, instaItems[0]);
 
-      if (trendingItemData) {
-        const titleText = trendingItemData.title || trendingItemData.caption || "Post Instagram du jour";
-        document.getElementById('trendingTitle').innerText = titleText;
+        const titleText = trendingItemData.title || trendingItemData.caption || "Post Instagram à la une";
+        const statsInfo = trendingItemData.likes ? ` (${trendingItemData.likes.toLocaleString('fr-FR')} likes)` : '';
+        document.getElementById('trendingTitle').innerText = titleText + statsInfo;
         document.getElementById('trendingBanner').style.display = 'flex';
       } else {
         document.getElementById('trendingBanner').style.display = 'none';
@@ -420,9 +399,7 @@
     }
 
     function openTrendingItem() {
-      if (trendingItemData) {
-        openModal(trendingItemData);
-      }
+      if (trendingItemData) openModal(trendingItemData);
     }
 
     function filterFeed(tab, event) {
@@ -605,6 +582,8 @@
       modalTitle.innerText = item.title || '';
       modalDate.innerText = item.date || '';
 
+      const captionText = item.fullCaption || item.caption || item.descriptionHtml || '';
+
       if (item.type === 'instagram') {
         modalBadge.className = 'badge badge-instagram';
         modalBadge.innerText = 'Instagram';
@@ -613,15 +592,12 @@
         let images = item.images && item.images.length > 0 ? item.images : [item.imageUrl];
         if (images.length > 1) {
           let trackHtml = `<div id="carouselTrack" class="carousel-track">` + images.map(img => `<img src="${img}" alt="Slide">`).join('') + `</div>`;
-          trackHtml += `<button id="prevBtn" class="carousel-nav-btn prev hidden" onclick="moveCarousel(-1)">❮</button>`;
+          trackHtml += `<button id="prevBtn" class="carousel-nav-btn prev" onclick="moveCarousel(-1)">❮</button>`;
           trackHtml += `<button id="nextBtn" class="carousel-nav-btn next" onclick="moveCarousel(1)">❯</button>`;
           modalContainer.innerHTML = `<div class="modal-media-box">${trackHtml}</div>`;
         } else {
           modalContainer.innerHTML = `<div class="modal-media-box"><img src="${images[0]}" style="width:100%; height:100%; object-fit:contain; display:block; margin:auto;" alt="Post"></div>`;
         }
-
-        descSection.innerHTML = `<div class="card-caption" style="font-size: 0.98rem; line-height: 1.6; color: #e2e8f0; white-space: pre-line;">${item.fullCaption || item.caption || ''}</div>`;
-        toggleBtn.style.display = 'none';
 
       } else if (item.type === 'youtube') {
         modalBadge.className = 'badge badge-youtube';
@@ -630,10 +606,6 @@
         extLink.href = `https://www.youtube.com/watch?v=${item.id}`;
 
         modalContainer.innerHTML = `<div class="modal-media-box"><iframe src="${item.embedUrl}?autoplay=1" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-        
-        descSection.innerHTML = `<div class="card-caption" style="font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; max-height: 120px; overflow: hidden; text-overflow: ellipsis;">${item.fullCaption || ''}</div>`;
-        toggleBtn.style.display = item.fullCaption && item.fullCaption.length > 150 ? 'inline-flex' : 'none';
-        toggleBtn.innerText = '📜 Lire la description complète';
 
       } else if (item.type === 'podcast') {
         modalBadge.className = 'badge badge-podcast';
@@ -661,8 +633,19 @@
         audioPlayer = new Audio(item.audioUrl);
         audioPlayer.addEventListener('timeupdate', updateAudioProgress);
         audioPlayer.addEventListener('ended', () => { isPlaying = false; updatePlayButtonUI(); });
+      }
 
-        descSection.innerHTML = `<div class="summary-card">${item.descriptionHtml || 'Résumé non disponible.'}</div>`;
+      // GESTION DU BOUTON SYSTEMATIQUE : AFFICHER / MASQUER LA DESCRIPTION
+      if (captionText && captionText.trim().length > 0) {
+        descSection.innerHTML = `
+          <div class="modal-caption-container">
+            <div id="modalCaptionText" class="modal-caption-text collapsed" style="white-space: pre-line;">${captionText}</div>
+          </div>
+        `;
+        toggleBtn.style.display = 'inline-flex';
+        toggleBtn.innerText = '📜 Voir la description complète';
+      } else {
+        descSection.innerHTML = '';
         toggleBtn.style.display = 'none';
       }
 
@@ -678,55 +661,52 @@
       if (e.target.id === 'mediaModal') closeModal();
     }
 
+    // ANIMATION CARROUSEL : REMBOBINAGE EN BOUCLE DU DERNIER AU PREMIER
     function moveCarousel(direction) {
       if (!currentModalItem || !currentModalItem.images) return;
       const totalImages = currentModalItem.images.length;
+      
       currentImgIndex += direction;
-      if (currentImgIndex < 0) currentImgIndex = 0;
-      if (currentImgIndex >= totalImages) currentImgIndex = totalImages - 1;
+
+      // Boucle fluide : du dernier vers le premier
+      if (currentImgIndex >= totalImages) {
+        currentImgIndex = 0;
+      } else if (currentImgIndex < 0) {
+        currentImgIndex = totalImages - 1;
+      }
 
       const track = document.getElementById('carouselTrack');
       if (track) {
         track.style.transform = `translateX(-${currentImgIndex * 100}%)`;
       }
-
-      document.getElementById('prevBtn').classList.toggle('hidden', currentImgIndex === 0);
-      document.getElementById('nextBtn').classList.toggle('hidden', currentImgIndex === totalImages - 1);
     }
 
+    // BOUTON UNIVERSEL : VOIR PLUS / MASQUER LA DESCRIPTION
     function toggleFullDescription() {
       isFullDescVisible = !isFullDescVisible;
-      const descSection = document.getElementById('modalDescriptionSection');
+      const captionTextEl = document.getElementById('modalCaptionText');
       const toggleBtn = document.getElementById('toggleDescBtn');
 
-      if (currentModalItem.type === 'youtube') {
+      if (captionTextEl && toggleBtn) {
         if (isFullDescVisible) {
-          descSection.innerHTML = `<div class="card-caption" style="font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line;">${currentModalItem.fullCaption || ''}</div>`;
-          toggleBtn.innerText = '🔼 Réduire la description';
+          captionTextEl.classList.remove('collapsed');
+          toggleBtn.innerText = '🔼 Masquer la description';
         } else {
-          descSection.innerHTML = `<div class="card-caption" style="font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; max-height: 120px; overflow: hidden; text-overflow: ellipsis;">${currentModalItem.fullCaption || ''}</div>`;
-          toggleBtn.innerText = '📜 Lire la description complète';
+          captionTextEl.classList.add('collapsed');
+          toggleBtn.innerText = '📜 Voir la description complète';
         }
       }
     }
 
     function togglePlayAudio() {
       if (!audioPlayer) return;
-      if (isPlaying) {
-        audioPlayer.pause();
-        isPlaying = false;
-      } else {
-        audioPlayer.play();
-        isPlaying = true;
-      }
+      if (isPlaying) { audioPlayer.pause(); isPlaying = false; }
+      else { audioPlayer.play(); isPlaying = true; }
       updatePlayButtonUI();
     }
 
     function stopAudio() {
-      if (audioPlayer) {
-        audioPlayer.pause();
-        audioPlayer = null;
-      }
+      if (audioPlayer) { audioPlayer.pause(); audioPlayer = null; }
       isPlaying = false;
     }
 
@@ -736,9 +716,7 @@
     }
 
     function skipAudio(seconds) {
-      if (audioPlayer) {
-        audioPlayer.currentTime += seconds;
-      }
+      if (audioPlayer) audioPlayer.currentTime += seconds;
     }
 
     function seekAudio(value) {
