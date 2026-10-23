@@ -25,17 +25,22 @@ def fetch_instagram_data():
         from apify_client import ApifyClient
         client = ApifyClient(token)
         
-        # Lancement de l'acteur Apify pour Instagram (compte hugodecrypte)
         run_input = {
+            "directUrls": ["https://www.instagram.com/hugodecrypte/"],
             "username": ["hugodecrypte"],
+            "usernames": ["hugodecrypte"],
             "resultsLimit": 50,
         }
-        actor_call = client.actor("apify/instagram-scraper").call(run_input=actor_call_input := run_input)
-        dataset_items = client.dataset(actor_call["defaultDatasetId"]).list_items().items
+        
+        # Lancement de l'acteur
+        client.actor("apify/instagram-scraper").call(run_input=run_input)
+        
+        # Récupération directe des éléments depuis le dataset par défaut du dernier run de cet acteur
+        actor_client = client.actor("apify/instagram-scraper")
+        dataset_items = actor_client.last_run().dataset().list_items().items
         
         posts = []
         for item in dataset_items:
-            # Extraction propre de la date réelle du post
             raw_time = item.get("timestamp") or item.get("takenAt")
             dt = datetime.now()
             
@@ -66,7 +71,6 @@ def fetch_instagram_data():
                     if child.get("displayUrl"):
                         images.append(child.get("displayUrl"))
             
-            # Si aucune image spécifique, on prend l'image principale
             if not images and item.get("imageUrl"):
                 images = [item.get("imageUrl")]
 
