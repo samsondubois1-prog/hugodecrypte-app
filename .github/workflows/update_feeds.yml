@@ -20,6 +20,11 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Installer les dépendances Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests apify-client
+
       - name: Lancer le script Instagram
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
