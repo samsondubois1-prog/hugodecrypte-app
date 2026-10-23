@@ -102,7 +102,7 @@
     .card.clickable { cursor: pointer; }
     .card:hover { transform: translateY(-6px); border-color: #3f4657; box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45); }
 
-    /* INSTAGRAM MODE BUREAU */
+    /* INSTAGRAM BUREAU */
     .card-insta {
       position: relative; border-radius: 18px; overflow: hidden; background: #000; display: flex; flex-direction: column;
     }
@@ -113,19 +113,14 @@
       width: 100%; height: auto; max-height: 420px; object-fit: contain; display: block;
     }
     .card-insta .insta-overlay {
-      width: 100%; padding: 12px 16px; background: rgba(15, 17, 21, 0.95);
-      border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; margin-top: auto;
+      width: 100%; padding: 10px 16px; background: rgba(15, 17, 21, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end; align-items: center; margin-top: auto;
     }
 
     .badge { font-size: 0.75rem; font-weight: 700; padding: 5px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
     .badge-instagram { background: rgba(225, 48, 108, 0.25); color: #ff5388; border: 1px solid rgba(225, 48, 108, 0.4); }
     .badge-youtube { background: rgba(255, 0, 0, 0.15); color: var(--accent-yt); }
     .badge-podcast { background: rgba(30, 215, 96, 0.15); color: var(--accent-pod); }
-
-    .carousel-tag {
-      font-size: 0.78rem; font-weight: 600; color: #e2e8f0; background: rgba(255, 255, 255, 0.12);
-      padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15);
-    }
 
     .media-box { position: relative; width: 100%; background: #0b0d10; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 220px; }
     .media-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -135,7 +130,7 @@
     .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px; margin-top: auto; }
     .card-date { font-size: 0.78rem; color: #cbd5e1; font-weight: 600; }
 
-    /* MODE INTERFACE TÉLÉPHONE : RECTANGLE, DÉTAILS CONSERVÉS ET BANDEAU DESSOUS */
+    /* MODE INTERFACE TÉLÉPHONE */
     body.mobile-mode { padding: 10px 4px; }
     body.mobile-mode header h1 { font-size: 1.4rem; }
     body.mobile-mode .feed-grid { 
@@ -144,43 +139,22 @@
       max-width: 100%; 
       padding: 0 2px; 
     }
-    body.mobile-mode .card { 
-      border-radius: 10px; 
-      border: 1px solid var(--border);
-    }
+    body.mobile-mode .card { border-radius: 10px; border: 1px solid var(--border); }
     
-    /* CARTES INSTAGRAM MOBILE */
     body.mobile-mode .card-insta { border-radius: 10px; }
     body.mobile-mode .card-insta .insta-img-container { 
-      width: 100%; 
-      height: 140px; 
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%; height: 140px; background: #000; display: flex; align-items: center; justify-content: center; 
     }
-    body.mobile-mode .card-insta .insta-img-container img { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: contain; 
-    }
+    body.mobile-mode .card-insta .insta-img-container img { width: 100%; height: 100%; object-fit: contain; }
     body.mobile-mode .card-insta .insta-overlay { 
-      position: relative; 
-      width: 100%;
-      padding: 6px 8px; 
-      background: rgba(15, 17, 21, 0.98); 
-      border-top: 1px solid rgba(255, 255, 255, 0.08); 
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      position: relative; width: 100%; padding: 4px 8px; background: rgba(15, 17, 21, 0.98); 
+      border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end; align-items: center; 
     }
 
-    /* YOUTUBE ET PODCASTS MOBILE (TITRE ET INFOS VISIBLES) */
     body.mobile-mode .card-body { padding: 8px; display: flex; } 
     body.mobile-mode .card-title { font-size: 0.72rem; line-height: 1.25; margin-bottom: 4px; }
     body.mobile-mode .card-footer { padding-top: 4px; flex-direction: column; align-items: flex-start; gap: 2px; }
     body.mobile-mode .media-box { height: 95px; }
-    body.mobile-mode .carousel-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; }
     body.mobile-mode .card-date { font-size: 0.62rem; color: #cbd5e1; }
     body.mobile-mode .badge { font-size: 0.58rem; padding: 2px 6px; }
 
@@ -218,8 +192,34 @@
 
     .modal-body { padding: 25px 30px; overflow-y: auto; }
     .modal-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .modal-title { font-size: 1.35rem; font-weight: 800; line-height: 1.3; color: var(--text-main); }
     
+    /* MODALE SPOTIFY STYLE POUR LES PODCASTS */
+    .spotify-podcast-player {
+      background: linear-gradient(135deg, #121212 0%, #1db954 100%);
+      padding: 35px 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; width: 100%;
+    }
+    .spotify-artwork {
+      width: 140px; height: 140px; border-radius: 12px; background: #282828; display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem; box-shadow: 0 12px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+    }
+    .spotify-info { text-align: center; max-width: 90%; }
+    .spotify-title { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 6px; line-height: 1.3; }
+    .spotify-subtitle { font-size: 0.85rem; color: #b3b3b3; }
+    
+    .spotify-controls { display: flex; align-items: center; gap: 25px; margin-top: 5px; }
+    .spotify-btn-ctrl { background: transparent; border: none; color: #b3b3b3; font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
+    .spotify-btn-ctrl:hover { color: #fff; }
+    .spotify-play-btn {
+      background: #1ed760; color: #000; width: 54px; height: 54px; border-radius: 50%; border: none;
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; transition: transform 0.2s, background 0.2s;
+    }
+    .spotify-play-btn:hover { transform: scale(1.05); background: #1fdf64; }
+
+    .spotify-progress-container { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 450px; margin-top: 5px; }
+    .spotify-time { font-size: 0.75rem; color: #a7a7a7; font-family: monospace; min-width: 38px; }
+    .spotify-slider { flex-grow: 1; height: 4px; background: #4d4d4d; border-radius: 2px; appearance: none; outline: none; cursor: pointer; }
+    .spotify-slider::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
+
     .modal-caption-container { margin-top: 15px; }
     .modal-caption-text { font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; }
     .modal-caption-text.collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -229,21 +229,6 @@
       cursor: pointer; font-size: 0.88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; margin-top: 12px;
     }
     .toggle-desc-btn:hover { background: #283040; color: #fff; border-color: #4a5568; }
-
-    .podcast-hero-box {
-      background: linear-gradient(135deg, rgba(30, 215, 96, 0.1) 0%, rgba(22, 25, 32, 0.8) 100%);
-      border: 1px solid rgba(30, 215, 96, 0.25); border-radius: 20px; padding: 24px; margin-top: 25px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 18px;
-    }
-    .player-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
-    .btn-player { background: #1e222d; border: 1px solid #323849; color: var(--text-main); width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
-    .btn-player:hover { background: #2a3040; }
-    .btn-player-main { background: var(--accent-pod); color: #000; width: 62px; height: 62px; font-size: 1.6rem; font-weight: bold; border: none; }
-    .btn-player-main:hover { background: #22ee6b; }
-
-    .progress-bar-container { display: flex; align-items: center; gap: 14px; width: 100%; }
-    .time-label { font-size: 0.82rem; color: var(--text-muted); font-family: monospace; min-width: 42px; }
-    .progress-bar { flex-grow: 1; height: 6px; background: #282e3d; border-radius: 3px; appearance: none; outline: none; cursor: pointer; }
-    .progress-bar::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-pod); cursor: pointer; }
 
     .summary-card { background: #181c26; border: 1px solid #282d3d; border-radius: 16px; padding: 20px; margin-top: 15px; line-height: 1.6; font-size: 0.95rem; color: #cbd5e1; }
   </style>
@@ -313,6 +298,7 @@
     <div id="feedGrid" class="feed-grid"></div>
   </main>
 
+  <!-- MODALE -->
   <div id="mediaModal" class="modal-overlay" onclick="closeModalOnBg(event)">
     <div class="modal-card">
       <button class="modal-close-btn" onclick="closeModal()">✕</button>
@@ -324,7 +310,7 @@
           <span id="modalBadge" class="badge"></span>
           <span id="modalDate" class="card-date"></span>
         </div>
-        <h2 id="modalTitle" class="modal-title"></h2>
+        <!-- Le titre complet avec "..." est supprimé de la modale comme demandé -->
 
         <div id="modalDescriptionSection"></div>
 
@@ -546,14 +532,12 @@
 
         if (item.type === 'instagram') {
           let imageUrl = item.imageUrl || (item.images && item.images[0]) || '';
-          let countInfo = item.images && item.images.length > 1 ? `<span class="carousel-tag">📷 ${item.images.length}</span>` : `<span class="badge badge-instagram">Insta</span>`;
-          
+          // Compteur d'images retiré de la grille, seule la date est affichée à droite
           card.innerHTML = `
             <div class="insta-img-container">
               <img src="${imageUrl}" alt="Instagram" loading="lazy">
             </div>
             <div class="insta-overlay">
-              ${countInfo}
               <span class="card-date">${item.date || 'Récents'}</span>
             </div>
           `;
@@ -610,7 +594,6 @@
       const modalContainer = document.getElementById('modalMediaContainer');
       const modalBadge = document.getElementById('modalBadge');
       const modalDate = document.getElementById('modalDate');
-      const modalTitle = document.getElementById('modalTitle');
       const descSection = document.getElementById('modalDescriptionSection');
       const toggleBtn = document.getElementById('toggleDescBtn');
       const extLink = document.getElementById('modalExternalLink');
@@ -618,7 +601,6 @@
       modalContainer.innerHTML = '';
       stopAudio();
 
-      modalTitle.innerText = item.title || '';
       modalDate.innerText = item.date || '';
 
       const captionText = item.fullCaption || item.caption || item.descriptionHtml || '';
@@ -651,20 +633,23 @@
         modalBadge.innerText = `Podcast • ${item.theme || 'Infos'}`;
         extLink.style.display = 'none';
 
+        // DESIGN SPOTIFY STYLE POUR LA MODALE PODCAST
         modalContainer.innerHTML = `
-          <div class="podcast-hero-box" style="margin: 0; width: 100%; height: 100%; justify-content: center; border-radius: 0;">
-            <div style="text-align: center; margin-bottom: 5px;">
-              <span style="font-size: 0.85rem; color: #1ed760; font-weight: 700; text-transform: uppercase;">🎧 Épisode officiel HugoDécrypte</span>
+          <div class="spotify-podcast-player">
+            <div class="spotify-artwork">🎙️</div>
+            <div class="spotify-info">
+              <div class="spotify-title">${item.title}</div>
+              <div class="spotify-subtitle">HugoDécrypte • ${item.theme || 'Podcast'}</div>
             </div>
-            <div class="player-controls">
-              <button class="btn-player" onclick="skipAudio(-15)" title="Reculer de 15s">⏪</button>
-              <button id="mainPlayBtn" class="btn-player btn-player-main" onclick="togglePlayAudio()">▶</button>
-              <button class="btn-player" onclick="skipAudio(15)" title="Avancer de 15s">⏩</button>
+            <div class="spotify-controls">
+              <button class="spotify-btn-ctrl" onclick="skipAudio(-15)" title="Reculer de 15s">⏪</button>
+              <button id="mainPlayBtn" class="spotify-play-btn" onclick="togglePlayAudio()">▶</button>
+              <button class="spotify-btn-ctrl" onclick="skipAudio(15)" title="Avancer de 15s">⏩</button>
             </div>
-            <div class="progress-bar-container">
-              <span id="currentTimeLabel" class="time-label">00:00</span>
-              <input type="range" id="audioSeekbar" class="progress-bar" value="0" min="0" max="100" oninput="seekAudio(this.value)">
-              <span id="durationLabel" class="time-label">00:00</span>
+            <div class="spotify-progress-container">
+              <span id="currentTimeLabel" class="spotify-time">00:00</span>
+              <input type="range" id="audioSeekbar" class="spotify-slider" value="0" min="0" max="100" oninput="seekAudio(this.value)">
+              <span id="durationLabel" class="spotify-time">00:00</span>
             </div>
           </div>
         `;
