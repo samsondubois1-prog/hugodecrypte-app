@@ -102,7 +102,7 @@
     .card.clickable { cursor: pointer; }
     .card:hover { transform: translateY(-6px); border-color: #3f4657; box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45); }
 
-    /* VIGNETTE RESSERRÉE AU BORD DE L'IMAGE */
+    /* VIGNETTE SERRÉE MODE BUREAU */
     .card-insta {
       position: relative; border-radius: 18px; overflow: hidden; background: #000; display: flex; flex-direction: column;
     }
@@ -135,18 +135,49 @@
     .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px; margin-top: auto; }
     .card-date { font-size: 0.78rem; color: #cbd5e1; font-weight: 600; }
 
-    /* MODE INTERFACE TÉLÉPHONE */
+    /* MODE INTERFACE TÉLÉPHONE (DIMENSION CARREES STYLE INSTAGRAM 1:1) */
     body.mobile-mode { padding: 10px 4px; }
     body.mobile-mode header h1 { font-size: 1.4rem; }
-    body.mobile-mode .feed-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; max-width: 100%; padding: 0 4px; }
-    body.mobile-mode .card { border-radius: 10px; }
-    body.mobile-mode .card-body { padding: 8px; }
-    body.mobile-mode .card-title { font-size: 0.75rem; line-height: 1.2; margin-bottom: 4px; }
-    body.mobile-mode .card-footer { padding-top: 6px; flex-direction: column; align-items: flex-start; gap: 4px; }
-    body.mobile-mode .badge { font-size: 0.6rem; padding: 2px 6px; }
-    body.mobile-mode .card-date { font-size: 0.65rem; }
-    body.mobile-mode .media-box { height: 100px; }
-    body.mobile-mode .card-insta .insta-img-container img { max-height: 140px; }
+    body.mobile-mode .feed-grid { 
+      grid-template-columns: repeat(3, 1fr) !important; 
+      gap: 3px !important; 
+      max-width: 100%; 
+      padding: 0; 
+    }
+    body.mobile-mode .card { 
+      border-radius: 2px; 
+      border: none;
+      aspect-ratio: 1 / 1; 
+      position: relative;
+    }
+    body.mobile-mode .card-body { display: none; } /* Focus sur la grille visuelle */
+    body.mobile-mode .media-box { height: 100%; width: 100%; }
+    
+    body.mobile-mode .card-insta { border-radius: 2px; }
+    body.mobile-mode .card-insta .insta-img-container { 
+      width: 100%; 
+      height: 100%; 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+    }
+    body.mobile-mode .card-insta .insta-img-container img { 
+      width: 100%; 
+      height: 100%; 
+      max-height: none; 
+      object-fit: cover; 
+    }
+    body.mobile-mode .card-insta .insta-overlay { 
+      position: absolute; 
+      bottom: 0; 
+      left: 0; 
+      padding: 4px 6px; 
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%); 
+      border-top: none; 
+    }
+    body.mobile-mode .carousel-tag { font-size: 0.65rem; padding: 2px 5px; border-radius: 6px; }
+    body.mobile-mode .card-date { font-size: 0.6rem; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
     body.mobile-mode .controls-container { flex-direction: column; gap: 8px; }
     body.mobile-mode .tabs-container { width: 100%; justify-content: center; }
     body.mobile-mode .tab-btn { padding: 6px 10px; font-size: 0.78rem; }
@@ -376,20 +407,15 @@
       }
     }
 
-    // CALCUL DE LA TENDANCE STRICTEMENT RESTREINT AU JOUR COURANT
     function computeTrendingOfTheDay() {
       if (!allMedia || allMedia.length === 0) return;
       const instaItems = allMedia.filter(i => (i.type || 'instagram') === 'instagram');
       if (instaItems.length === 0) return;
 
-      // Date du post le plus récent du flux (considéré comme aujourd'hui)
       const latestDateIso = instaItems[0].dateIso;
-
-      // Filtrer uniquement les posts appartenant à cette journée
       const todayItems = instaItems.filter(i => i.dateIso === latestDateIso);
 
       if (todayItems.length > 0) {
-        // Trouver le plus populaire du jour (likes + commentaires)
         trendingItemData = todayItems.reduce((max, item) => {
           const score = item.engagementScore || item.likes || 0;
           const maxScore = max.engagementScore || max.likes || 0;
@@ -642,7 +668,6 @@
         audioPlayer.addEventListener('ended', () => { isPlaying = false; updatePlayButtonUI(); });
       }
 
-      // BOUTON UNIVERSEL : AFFICHER / MASQUER LA DESCRIPTION
       if (captionText && captionText.trim().length > 0) {
         descSection.innerHTML = `
           <div class="modal-caption-container">
@@ -668,7 +693,6 @@
       if (e.target.id === 'mediaModal') closeModal();
     }
 
-    // ANIMATION CARROUSEL : BOUCLE DU DERNIER AU PREMIER
     function moveCarousel(direction) {
       if (!currentModalItem || !currentModalItem.images) return;
       const totalImages = currentModalItem.images.length;
@@ -687,7 +711,6 @@
       }
     }
 
-    // BOUTON UNIVERSEL : VOIR PLUS / MASQUER LA DESCRIPTION
     function toggleFullDescription() {
       isFullDescVisible = !isFullDescVisible;
       const captionTextEl = document.getElementById('modalCaptionText');
