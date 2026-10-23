@@ -2,7 +2,7 @@ name: Mettre à jour les flux HugoDécrypte
 
 on:
   schedule:
-    # 8h00 UTC et 14h00 UTC (ce qui correspond à 10h00 et 16h00 en France)
+    # 8h00 UTC et 14h00 UTC (10h00 et 16h00 heure française)
     - cron: '0 8,14 * * *'
   
   workflow_dispatch:
@@ -21,6 +21,8 @@ jobs:
           python-version: '3.10'
 
       - name: Lancer le script Instagram
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
         run: python fetch_instagram.py
 
       - name: Lancer le script global (YouTube, Podcasts, Fusion)
