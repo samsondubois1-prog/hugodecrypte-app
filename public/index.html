@@ -123,17 +123,18 @@
     .card.clickable { cursor: pointer; }
     .card:hover { transform: translateY(-6px); border-color: #3f4657; box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45); }
 
+    /* AFFICHAGE INSTAGRAM : IMAGE EN ENTIER CONTRE LES BORDS */
     .card-insta {
       position: relative; border-radius: 18px; overflow: hidden; background: #161920; display: flex; flex-direction: column;
     }
     .card-insta .insta-img-container {
-      width: 100%; height: 300px; background: #0b0d10; display: flex; align-items: center; justify-content: center; overflow: hidden;
+      width: 100%; height: 320px; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0;
     }
     .card-insta .insta-img-container img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
+      width: 100%; height: 100%; object-fit: contain; display: block;
     }
     .card-insta .insta-overlay {
-      width: 100%; padding: 12px 16px; background: rgba(10, 12, 16, 0.95);
+      width: 100%; padding: 10px 14px; background: rgba(15, 17, 21, 0.98);
       border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; margin-top: auto;
     }
 
@@ -171,7 +172,7 @@
     body.mobile-mode .badge { font-size: 0.6rem; padding: 2px 6px; }
     body.mobile-mode .card-date { font-size: 0.65rem; }
     body.mobile-mode .media-box { height: 100px; }
-    body.mobile-mode .card-insta .insta-img-container { height: 110px; }
+    body.mobile-mode .card-insta .insta-img-container { height: 130px; }
     body.mobile-mode .controls-container { flex-direction: column; gap: 8px; }
     body.mobile-mode .tabs-container { width: 100%; justify-content: center; }
     body.mobile-mode .tab-btn { padding: 6px 10px; font-size: 0.78rem; }
@@ -365,7 +366,6 @@
       }
     }
 
-    // RAFRAÎCHISSEMENT SÉCURISÉ LIMITÉ À 2 FOIS PAR JOUR
     async function manualRefreshData() {
       const today = new Date().toISOString().split('T')[0];
       let lastRefreshDate = localStorage.getItem('hugo_refresh_date') || '';
@@ -385,7 +385,6 @@
       localStorage.setItem('hugo_refresh_date', lastRefreshDate);
       localStorage.setItem('hugo_refresh_count', refreshCount);
 
-      // Recharge propre des données JSON sans erreur de token
       await loadData();
       alert("🔄 Actualisation réussie ! Les dernières données ont été rechargées.");
     }
@@ -679,7 +678,6 @@
       if (e.target.id === 'mediaModal') closeModal();
     }
 
-    // ANIMATION DU CARROUSEL D'IMAGES (FLUIDE)
     function moveCarousel(direction) {
       if (!currentModalItem || !currentModalItem.images) return;
       const totalImages = currentModalItem.images.length;
